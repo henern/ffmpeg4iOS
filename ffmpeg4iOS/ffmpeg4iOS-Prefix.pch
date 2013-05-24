@@ -1,0 +1,10 @@
+//
+// Prefix header for all source files of the 'ffmpeg4iOS' target in the 'ffmpeg4iOS' project
+//
+
+#ifdef __OBJC__
+    #import <Foundation/Foundation.h>
+#endif
+
+#define CODEC_TYPE_VIDEO AVMEDIA_TYPE_VIDEO
+#define CODEC_TYPE_AUDIO AVMEDIA_TYPE_AUDIO
