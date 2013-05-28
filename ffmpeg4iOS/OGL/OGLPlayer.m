@@ -169,7 +169,7 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
 		NSLog(@"Opened stream");
 	}
 	
-	err = av_find_stream_info(avfContext);
+	err = avformat_find_stream_info(avfContext, NULL);
 	if (err < 0) {
 		NSLog(@"Error: Could not find stream info: %d", err);
 				return;
@@ -251,14 +251,14 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
 	AVCodec *codec = avcodec_find_decoder(enc->codec_id);
 	if (!codec) {
 		NSLog(@"Error: Could not find decoder for video codec %d", enc->codec_id);
-		av_close_input_file(avfContext);
+		avformat_close_input(&avfContext);
 				return;
 	}
 	
-	err = avcodec_open(enc, codec);
+	err = avcodec_open2(enc, codec, NULL);
 	if (err < 0) {
 		NSLog(@"Error: Could not open video decoder: %d", err);
-		av_close_input_file(avfContext);
+		avformat_close_input(&avfContext);
 			return;
 	}
 	
@@ -303,7 +303,8 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
 			audioFormat.mChannelsPerFrame = avfContext->streams[audio_index]->codec->channels;
 			audioFormat.mBitsPerChannel = 0;
 			
-			if (err = AudioQueueNewOutput(&audioFormat, audioQueueOutputCallback, self, NULL, NULL, 0, &audioQueue)) {
+            err = AudioQueueNewOutput(&audioFormat, audioQueueOutputCallback, self, NULL, NULL, 0, &audioQueue);
+			if (err) {
 				NSLog(@"Error creating audio output queue: %d", err);
 				avfContext->streams[audio_index]->discard = AVDISCARD_ALL;
 				audio_index = -1;
@@ -311,7 +312,8 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
 			else {
 				for (i = 0; i < AUDIO_BUFFER_QUANTITY; i++) {
 					NSLog(@"%d packet capacity, %d byte capacity", (int)(avfContext->streams[audio_index]->codec->sample_rate * AUDIO_BUFFER_SECONDS / avfContext->streams[audio_index]->codec->frame_size + 1), (int)(avfContext->streams[audio_index]->codec->bit_rate * AUDIO_BUFFER_SECONDS / 8));
-					if (err = AudioQueueAllocateBufferWithPacketDescriptions(audioQueue, avfContext->streams[audio_index]->codec->bit_rate * AUDIO_BUFFER_SECONDS / 8, avfContext->streams[audio_index]->codec->sample_rate * AUDIO_BUFFER_SECONDS / avfContext->streams[audio_index]->codec->frame_size + 1, audioBuffers + i)) {
+                    err = AudioQueueAllocateBufferWithPacketDescriptions(audioQueue, avfContext->streams[audio_index]->codec->bit_rate * AUDIO_BUFFER_SECONDS / 8, avfContext->streams[audio_index]->codec->sample_rate * AUDIO_BUFFER_SECONDS / avfContext->streams[audio_index]->codec->frame_size + 1, audioBuffers + i);
+					if (err) {
 						NSLog(@"Error: Could not allocate audio queue buffer: %d", err);
 						avfContext->streams[audio_index]->discard = AVDISCARD_ALL;
 						audio_index = -1;
@@ -388,7 +390,8 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
 			if (startTime == 0) {
 				startTime = av_gettime() - nextPts;
 				if (audio_index >= 0) {
-					if (err = AudioQueueStart(audioQueue, NULL)) {
+                    err = AudioQueueStart(audioQueue, NULL);
+					if (err) {
 						NSLog(@"Error: Audio queue failed to start: %d", err);
 					}
 					else {
@@ -586,8 +589,9 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
 				for (i = 0; i < AUDIO_BUFFER_QUANTITY; i++) {
 					[self fillAudioBuffer:audioBuffers[i]];
 				}
-				
-				if (err = AudioQueuePrime(audioQueue, 0, NULL)) {
+                
+				err = AudioQueuePrime(audioQueue, 0, NULL);
+				if (err) {
 					NSLog(@"Error: Failed to prime audio queue: %d", err);
 				}
 			}
@@ -612,7 +616,7 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
 				ts.tv_nsec = (delay % 1000000) * 1000;
 				
 				if (nanosleep(&ts, NULL) && errno != EINTR) {
-					NSLog(@"nanosleep failed (%d, %d): %s", ts.tv_sec, ts.tv_nsec, strerror(errno));
+					NSLog(@"nanosleep failed (%ld, %ld): %s", ts.tv_sec, ts.tv_nsec, strerror(errno));
 				}				
 			}
 		}
@@ -640,7 +644,8 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
 	int err;
 	
 	glClear(GL_COLOR_BUFFER_BIT);
-	if (err = glGetError()) {
+	err = glGetError();
+    if (err) {
 		NSLog(@"Error: Could not clear frame buffer: %d", err);
 	}
 	
@@ -674,7 +679,8 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
 	
 	frameReady = false;
 
-	if (currentVideoBuffer = [videoBuffer tryGetReadBuffer]) {
+    currentVideoBuffer = [videoBuffer tryGetReadBuffer];
+	if (currentVideoBuffer) {
 		[self renderFrameToTexture:currentVideoBuffer];
 		nextPts = currentVideoBuffer.pts;
 	
@@ -742,14 +748,16 @@ void audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueueBuffer
 	if (buffer->mPacketDescriptionCount > 0) {
 		OSStatus err;
 		
-		if (err = AudioQueueEnqueueBufferWithParameters(audioQueue, buffer, 0, NULL, 0, 0, 0, NULL, &bufferStartTime, NULL)) {
-			NSLog(@"Error enqueuing audio buffer: %d", err);
+        err = AudioQueueEnqueueBufferWithParameters(audioQueue, buffer, 0, NULL, 0, 0, 0, NULL, &bufferStartTime, NULL);
+		if (err) {
+			NSLog(@"Error enqueuing audio buffer: %ld", err);
 		}
 		
 		[decodeDoneLock lock];
 		if (decodeDone && audioPacketQueue.count == 0) {
-			if (err = AudioQueueStop(audioQueue, false)) {
-				NSLog(@"Error: Failed to stop audio queue: %d", err);
+            err = AudioQueueStop(audioQueue, false);
+			if (err) {
+				NSLog(@"Error: Failed to stop audio queue: %ld", err);
 			}
 			else {
 				NSLog(@"Stopped audio queue");
@@ -810,7 +818,7 @@ int64_t avSeek(void *opaque, int64_t offset, int whence) {
 	}
 	sws_freeContext(img_convert_ctx);
 	avcodec_close(enc);
-	av_close_input_file(avfContext);
+	avformat_close_input(&avfContext);
 
     [_prgrmOGL release];
     _prgrmOGL = nil;

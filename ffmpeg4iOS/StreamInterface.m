@@ -49,13 +49,13 @@ const char transcodeCommand[] = "ffmpeg -i - -async 10 -vcodec mpeg2video -b 200
 
 
 - (int64_t)seek:(int64_t)offset whence:(int)whence {
-	return nil;
+	return 0;
 	NSLog(@"seeking...");
 }
 
 
 - (int)read:(uint8_t *)buffer length:(int)len {
-	int ret;
+	int ret = 0;
 	
 	assert(bytesRequested >= 0);
 	
@@ -145,7 +145,16 @@ const char transcodeCommand[] = "ffmpeg -i - -async 10 -vcodec mpeg2video -b 200
 }
 	
 	
+- (void)disconnect
+{
+    NSAssert(0, @"TODO");
+}
 
+- (BOOL)startLiveTV
+{
+    NSAssert(0, @"TODO");
+    return NO;
+}
 
 
 - (void)dealloc {

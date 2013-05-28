@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		23081C1E174FE4B40062EDCA /* CacheBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 23081C17174FE4B40062EDCA /* CacheBuffer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		23081C1F174FE4B40062EDCA /* FrameData.m in Sources */ = {isa = PBXBuildFile; fileRef = 23081C19174FE4B40062EDCA /* FrameData.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		23081C20174FE4B40062EDCA /* Player.m in Sources */ = {isa = PBXBuildFile; fileRef = 23081C1B174FE4B40062EDCA /* Player.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		23081C21174FE4B40062EDCA /* StreamInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 23081C1D174FE4B40062EDCA /* StreamInterface.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		23081C22174FE4C80062EDCA /* CacheBuffer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23081C16174FE4B40062EDCA /* CacheBuffer.h */; };
 		23081C23174FE4C80062EDCA /* FrameData.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23081C18174FE4B40062EDCA /* FrameData.h */; };
@@ -1096,7 +1095,6 @@
 				23CCC89A173E101B00EB8706 /* ffmpeg4iOS.m in Sources */,
 				23081C1E174FE4B40062EDCA /* CacheBuffer.m in Sources */,
 				23081C1F174FE4B40062EDCA /* FrameData.m in Sources */,
-				23081C20174FE4B40062EDCA /* Player.m in Sources */,
 				23081C21174FE4B40062EDCA /* StreamInterface.m in Sources */,
 				23DC61EF1753BE2500F14E31 /* YUV2RGB.vert in Sources */,
 				23DC62171753DCD600F14E31 /* YUV2RGB.frag in Sources */,

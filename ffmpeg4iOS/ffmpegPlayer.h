@@ -14,6 +14,7 @@
 
 @protocol ffmpegPlayer <NSObject>
 - (void)fillAudioBuffer:(AudioQueueBufferRef)buffer;
+- (BOOL)presentFrame;
 @end
 
 #endif
