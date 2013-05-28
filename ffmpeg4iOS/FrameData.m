@@ -7,6 +7,9 @@
 @synthesize data;
 @synthesize pts;
 
+@synthesize width;
+@synthesize height;
+
 
 - (id)init {
 	if (self = [super init]) {
