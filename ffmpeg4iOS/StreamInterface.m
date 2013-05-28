@@ -28,7 +28,7 @@ const char transcodeCommand[] = "ffmpeg -i - -async 10 -vcodec mpeg2video -b 200
 }
 
 
-- (id)initWithPlayer:(Player *)newPlayer server:(NSString *)newServer port:(unsigned short)newPort streamconvergTable:(NSString *)newTable username:(NSString *)newUsername password:(NSString *)newPassword {
+- (id)initWithPlayer:(id<ffmpegPlayer>)newPlayer server:(NSString *)newServer port:(unsigned short)newPort streamconvergTable:(NSString *)newTable username:(NSString *)newUsername password:(NSString *)newPassword {
 	if (this) {
 		NSLog(@"Error: Only one streamInterface may be instantiated at a time");
 		[super dealloc];

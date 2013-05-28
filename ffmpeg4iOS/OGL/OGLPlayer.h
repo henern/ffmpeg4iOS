@@ -1,11 +1,16 @@
 //
+//  reference:
+//  http://blog.csdn.net/xiaoguaihai/article/details/8672631
+//  http://www.cocoachina.com/bbs/read.php?tid=100908
+//  http://stackoverflow.com/questions/6432159/render-ypcbcr-iphone-4-camera-frame-to-an-opengl-es-2-0-texture-in-ios-4-3
+//
+
 #import <AudioToolbox/AudioQueue.h>
-#import <OpenGLES/EAGL.h>
-#import <OpenGLES/ES1/gl.h>
-#import <OpenGLES/ES1/glext.h>
 #import <UIKit/UIKit.h>
 #import "CacheBuffer.h"
 #import "libavformat/avformat.h"
+
+#import "OGLCommon.h"       // common header for OGL
 #import "ffmpegPlayer.h"
 
 #define AUDIO_BUFFER_QUANTITY 3
@@ -16,11 +21,10 @@
 @class CacheBuffer;
 
 
-@interface Player : UIView <ffmpegPlayer> {
+@interface OGLPlayer : UIView <ffmpegPlayer>
+{
 	EAGLContext *context;
-	GLuint renderbuffer;
-	GLuint framebuffer;
-	GLuint texture;
+
 	AVFormatContext *avfContext;
 	int video_index;
 	int audio_index;

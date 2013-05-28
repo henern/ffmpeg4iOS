@@ -1,15 +1,14 @@
 
 #import <Foundation/Foundation.h>
-
+#import "ffmpegPlayer.h"
 
 
 
 @class streamControlThreadObject;
-@class Player;
 
 
 @interface StreamInterface : NSObject {
-	Player *player;
+	id<ffmpegPlayer> player;
 	NSString *server;
 	unsigned short port;
 	NSString *table;
@@ -25,7 +24,7 @@
 + (StreamInterface *)interface;
 
 
-- (id)initWithPlayer:(Player *)player server:(NSString *)newServer port:(unsigned short)newPort streamconvergTable:(NSString *)newTable username:(NSString *)newUsername password:(NSString *)newPassword;
+- (id)initWithPlayer:(id<ffmpegPlayer>)player server:(NSString *)newServer port:(unsigned short)newPort streamconvergTable:(NSString *)newTable username:(NSString *)newUsername password:(NSString *)newPassword;
 - (BOOL)connect;
 - (void)disconnect;
 - (BOOL)startLiveTV;
@@ -35,7 +34,7 @@
 - (BOOL)cstreamRequestTimeoutLength:(struct timeval *)timeout;
 
 
-@property (readonly) Player *player;
+@property (readonly) id<ffmpegPlayer> player;
 
 @property (assign) int64_t framePresentTime;
 
