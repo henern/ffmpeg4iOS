@@ -28,8 +28,8 @@
 #import <QuartzCore/QuartzCore.h>
 
 
-#define FRAME_X 256
-#define FRAME_Y 256
+#define FRAME_X 1024
+#define FRAME_Y 1024
 
 #define VIDEO_BUFFER_QUANTITY 10
 #define VIDEO_QUEUE_SIZE_MAX 5 * 25 * 1024
