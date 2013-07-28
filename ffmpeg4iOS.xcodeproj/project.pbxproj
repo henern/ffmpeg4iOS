@@ -12,7 +12,6 @@
 		23081C21174FE4B40062EDCA /* StreamInterface.m in Sources */ = {isa = PBXBuildFile; fileRef = 23081C1D174FE4B40062EDCA /* StreamInterface.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		23081C22174FE4C80062EDCA /* CacheBuffer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23081C16174FE4B40062EDCA /* CacheBuffer.h */; };
 		23081C23174FE4C80062EDCA /* FrameData.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23081C18174FE4B40062EDCA /* FrameData.h */; };
-		23081C24174FE4C80062EDCA /* Player.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23081C1A174FE4B40062EDCA /* Player.h */; };
 		23081C25174FE4C80062EDCA /* StreamInterface.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23081C1C174FE4B40062EDCA /* StreamInterface.h */; };
 		2375328C1754FDEE00AF4BB3 /* OGLPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2375328B1754FDEE00AF4BB3 /* OGLPlayer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		237532901754FF7900AF4BB3 /* OGLCommon.m in Sources */ = {isa = PBXBuildFile; fileRef = 2375328F1754FF7900AF4BB3 /* OGLCommon.m */; };
@@ -55,7 +54,6 @@
 				2375329C1755107C00AF4BB3 /* OGLProgram.h in CopyFiles */,
 				23081C22174FE4C80062EDCA /* CacheBuffer.h in CopyFiles */,
 				23081C23174FE4C80062EDCA /* FrameData.h in CopyFiles */,
-				23081C24174FE4C80062EDCA /* Player.h in CopyFiles */,
 				23081C25174FE4C80062EDCA /* StreamInterface.h in CopyFiles */,
 				23CCC898173E101A00EB8706 /* ffmpeg4iOS.h in CopyFiles */,
 			);
@@ -68,8 +66,6 @@
 		23081C17174FE4B40062EDCA /* CacheBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CacheBuffer.m; sourceTree = "<group>"; };
 		23081C18174FE4B40062EDCA /* FrameData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FrameData.h; sourceTree = "<group>"; };
 		23081C19174FE4B40062EDCA /* FrameData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FrameData.m; sourceTree = "<group>"; };
-		23081C1A174FE4B40062EDCA /* Player.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Player.h; sourceTree = "<group>"; };
-		23081C1B174FE4B40062EDCA /* Player.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Player.m; sourceTree = "<group>"; };
 		23081C1C174FE4B40062EDCA /* StreamInterface.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamInterface.h; sourceTree = "<group>"; };
 		23081C1D174FE4B40062EDCA /* StreamInterface.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamInterface.m; sourceTree = "<group>"; };
 		23368F9B173FA4B30051BFEA /* adler32.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = adler32.h; sourceTree = "<group>"; };
@@ -569,8 +565,6 @@
 				23081C17174FE4B40062EDCA /* CacheBuffer.m */,
 				23081C18174FE4B40062EDCA /* FrameData.h */,
 				23081C19174FE4B40062EDCA /* FrameData.m */,
-				23081C1A174FE4B40062EDCA /* Player.h */,
-				23081C1B174FE4B40062EDCA /* Player.m */,
 				23081C1C174FE4B40062EDCA /* StreamInterface.h */,
 				23081C1D174FE4B40062EDCA /* StreamInterface.m */,
 				23CCC897173E101A00EB8706 /* ffmpeg4iOS.h */,
