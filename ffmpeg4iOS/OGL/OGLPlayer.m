@@ -426,7 +426,7 @@ int64_t avSeek(void *opaque, int64_t offset, int whence);
             // enqueue packet for render thread
             {
             avpicture_fill(&picture, [currentVideoBuffer.data mutableBytes], PIX_FMT_YUV420P, enc->width, enc->height);
-            av_picture_copy(&picture, avFrame, enc->pix_fmt, enc->width, enc->height);
+            av_picture_copy(&picture, (AVPicture*)avFrame, enc->pix_fmt, enc->width, enc->height);
         
             currentVideoBuffer.width = enc->width;
             currentVideoBuffer.height = enc->height;

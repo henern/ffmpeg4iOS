@@ -26,7 +26,6 @@
 		23CCC893173E101A00EB8706 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23CCC892173E101A00EB8706 /* Foundation.framework */; };
 		23CCC898173E101A00EB8706 /* ffmpeg4iOS.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23CCC897173E101A00EB8706 /* ffmpeg4iOS.h */; };
 		23CCC89A173E101B00EB8706 /* ffmpeg4iOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CCC899173E101B00EB8706 /* ffmpeg4iOS.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		23DC61EF1753BE2500F14E31 /* YUV2RGB.vert in Sources */ = {isa = PBXBuildFile; fileRef = 23DC61EE1753BE2500F14E31 /* YUV2RGB.vert */; };
 		23DC62081753C78C00F14E31 /* libavcodec.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23DC62001753C78C00F14E31 /* libavcodec.a */; };
 		23DC62091753C78C00F14E31 /* libavdevice.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23DC62011753C78C00F14E31 /* libavdevice.a */; };
 		23DC620A1753C78C00F14E31 /* libavfilter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23DC62021753C78C00F14E31 /* libavfilter.a */; };
@@ -35,7 +34,6 @@
 		23DC620D1753C78C00F14E31 /* libpostproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23DC62051753C78C00F14E31 /* libpostproc.a */; };
 		23DC620E1753C78C00F14E31 /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23DC62061753C78C00F14E31 /* libswresample.a */; };
 		23DC620F1753C78C00F14E31 /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23DC62071753C78C00F14E31 /* libswscale.a */; };
-		23DC62171753DCD600F14E31 /* YUV2RGB.frag in Sources */ = {isa = PBXBuildFile; fileRef = 23DC62161753DCD600F14E31 /* YUV2RGB.frag */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -1090,8 +1088,6 @@
 				23081C1E174FE4B40062EDCA /* CacheBuffer.m in Sources */,
 				23081C1F174FE4B40062EDCA /* FrameData.m in Sources */,
 				23081C21174FE4B40062EDCA /* StreamInterface.m in Sources */,
-				23DC61EF1753BE2500F14E31 /* YUV2RGB.vert in Sources */,
-				23DC62171753DCD600F14E31 /* YUV2RGB.frag in Sources */,
 				2375328C1754FDEE00AF4BB3 /* OGLPlayer.m in Sources */,
 				237532901754FF7900AF4BB3 /* OGLCommon.m in Sources */,
 				237532941755029B00AF4BB3 /* OGLProgram.m in Sources */,
