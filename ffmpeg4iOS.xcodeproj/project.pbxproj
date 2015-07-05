@@ -13,6 +13,7 @@
 		23081C22174FE4C80062EDCA /* CacheBuffer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23081C16174FE4B40062EDCA /* CacheBuffer.h */; };
 		23081C23174FE4C80062EDCA /* FrameData.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23081C18174FE4B40062EDCA /* FrameData.h */; };
 		23081C25174FE4C80062EDCA /* StreamInterface.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23081C1C174FE4B40062EDCA /* StreamInterface.h */; };
+		2374A87A1B49366E0069CE94 /* CyberPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 2374A8791B49366E0069CE94 /* CyberPlayerController.m */; };
 		2375328C1754FDEE00AF4BB3 /* OGLPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = 2375328B1754FDEE00AF4BB3 /* OGLPlayer.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		237532901754FF7900AF4BB3 /* OGLCommon.m in Sources */ = {isa = PBXBuildFile; fileRef = 2375328F1754FF7900AF4BB3 /* OGLCommon.m */; };
 		237532941755029B00AF4BB3 /* OGLProgram.m in Sources */ = {isa = PBXBuildFile; fileRef = 237532931755029B00AF4BB3 /* OGLProgram.m */; };
@@ -448,6 +449,8 @@
 		23369116173FA5510051BFEA /* swscale_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = swscale_internal.h; sourceTree = "<group>"; };
 		23369117173FA5510051BFEA /* swscale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = swscale.h; sourceTree = "<group>"; };
 		23369118173FA5510051BFEA /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
+		2374A8781B4934C10069CE94 /* CyberPlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CyberPlayerController.h; sourceTree = "<group>"; };
+		2374A8791B49366E0069CE94 /* CyberPlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CyberPlayerController.m; sourceTree = "<group>"; };
 		2375328A1754FDEE00AF4BB3 /* OGLPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OGLPlayer.h; sourceTree = "<group>"; };
 		2375328B1754FDEE00AF4BB3 /* OGLPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = OGLPlayer.m; sourceTree = "<group>"; };
 		2375328D1754FEB700AF4BB3 /* Vertex.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Vertex.h; sourceTree = "<group>"; };
@@ -519,6 +522,15 @@
 			path = Shader;
 			sourceTree = "<group>";
 		};
+		2374A8771B4934C10069CE94 /* CyberPlayer */ = {
+			isa = PBXGroup;
+			children = (
+				2374A8781B4934C10069CE94 /* CyberPlayerController.h */,
+				2374A8791B49366E0069CE94 /* CyberPlayerController.m */,
+			);
+			path = CyberPlayer;
+			sourceTree = "<group>";
+		};
 		237532951755053B00AF4BB3 /* ehm */ = {
 			isa = PBXGroup;
 			children = (
@@ -555,6 +567,7 @@
 		23CCC894173E101A00EB8706 /* ffmpeg4iOS */ = {
 			isa = PBXGroup;
 			children = (
+				2374A8771B4934C10069CE94 /* CyberPlayer */,
 				237532951755053B00AF4BB3 /* ehm */,
 				2321B7A81752003A00C31474 /* OGL */,
 				2328B0A91751FEDE000C9C6F /* Shader */,
@@ -1061,6 +1074,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 0450;
+				ORGANIZATIONNAME = github.com/henern;
 			};
 			buildConfigurationList = 23CCC889173E101A00EB8706 /* Build configuration list for PBXProject "ffmpeg4iOS" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1084,6 +1098,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2374A87A1B49366E0069CE94 /* CyberPlayerController.m in Sources */,
 				23CCC89A173E101B00EB8706 /* ffmpeg4iOS.m in Sources */,
 				23081C1E174FE4B40062EDCA /* CacheBuffer.m in Sources */,
 				23081C1F174FE4B40062EDCA /* FrameData.m in Sources */,
@@ -1164,7 +1179,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				VALID_ARCHS = armv7;
+				VALID_ARCHS = "armv7 arm64";
 			};
 			name = Debug;
 		};
@@ -1189,7 +1204,7 @@
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
-				VALID_ARCHS = armv7;
+				VALID_ARCHS = "armv7 arm64";
 			};
 			name = Release;
 		};
