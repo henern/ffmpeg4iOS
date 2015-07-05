@@ -2,10 +2,16 @@
 #!export PATH=$PATH:/Applications/Xcode.app/Contents/Developer/usr/bin:/usr/bin
 set xbinDir="/Applications/Xcode.app/Contents/Developer/usr/bin"
 
-set targetDir="./ffmpeg-libs/i386"
+set targetDir_root="./ffmpeg-libs"
+set targetDir="${targetDir_root}/i386"
+if (! -d ${targetDir_root} ) mkdir ${targetDir_root}
 if (! -d $targetDir ) mkdir $targetDir
 
 rm -f $targetDir/*.a
+
+set headerDir="${targetDir}/headers"
+if (! -d $headerDir ) mkdir $headerDir
+rm -f $headerDir/*.h
 
 $xbinDir/make clean
 
@@ -45,4 +51,21 @@ mv ./libavfilter/libavfilter.a $targetDir
 mv ./libpostproc/libpostproc.a $targetDir
 mv ./libswresample/libswresample.a $targetDir
 
+mkdir $headerDir/libavcodec
+cp ./libavcodec/*.h $headerDir/libavcodec
+mkdir $headerDir/libavdevice
+cp ./libavdevice/*.h $headerDir/libavdevice
+mkdir $headerDir/libavformat
+cp ./libavformat/*.h $headerDir/libavformat
+mkdir $headerDir/libavutil
+cp ./libavutil/*.h $headerDir/libavutil
+mkdir $headerDir/libswscale
+cp ./libswscale/*.h $headerDir/libswscale
+mkdir $headerDir/libavfilter
+cp ./libavfilter/*.h $headerDir/libavfilter
+mkdir $headerDir/libpostproc
+cp ./libpostproc/*.h $headerDir/libpostproc
+mkdir $headerDir/libswresample
+cp ./libswresample/*.h $headerDir/libswresample
 
+open "./ffmpeg-libs"
