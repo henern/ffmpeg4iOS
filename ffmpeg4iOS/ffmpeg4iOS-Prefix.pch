@@ -4,6 +4,7 @@
 
 #ifdef __OBJC__
     #import <Foundation/Foundation.h>
+    #import "LibCommon.h"
 #endif
 
 #define CODEC_TYPE_VIDEO AVMEDIA_TYPE_VIDEO
