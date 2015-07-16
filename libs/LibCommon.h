@@ -9,8 +9,20 @@
 #ifndef ffmpeg4iOS_LibCommon_h
 #define ffmpeg4iOS_LibCommon_h
 
+// class
+#define DEF_COMBINE(name, prefix)   prefix##name
 #define DEF_CLASS_PREFIX        WW
-#define DEF_CLASS(name)         DEF_CLASS_PREFIX##name
-#define REF_CLASS(name)         DEF_CLASS(name)
+#define DEF_CLASS(name)         DEF_COMBINE(name, DEF_CLASS_PREFIX)
+#define REF_CLASS(name)         DEF_CLASS(name)*
+
+// log
+#if DEBUG
+#define FFMLOG(...)             NSLog(__VA_ARGS__)
+#else
+#define FFMLOG(...)
+#endif
+
+// weak
+#define DEF_WEAK_SELF()         __weak typeof(self) weak_self = self
 
 #endif

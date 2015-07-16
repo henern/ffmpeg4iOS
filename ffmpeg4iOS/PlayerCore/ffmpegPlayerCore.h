@@ -10,4 +10,12 @@
 
 @interface DEF_CLASS(ffmpegPlayerCore) : UIView
 
+- (instancetype)initWithFrame:(CGRect)frame path:(NSString*)path4video;
+- (NSString*)path;
+- (NSError*)lastError;
+
+- (void)play;
+- (void)pause;
+- (void)seekTo:(double)pos;
+
 @end
