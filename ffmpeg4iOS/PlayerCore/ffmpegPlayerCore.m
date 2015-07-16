@@ -17,9 +17,6 @@
 #import "libswscale/swscale.h"
 
 @interface DEF_CLASS(ffmpegPlayerCore) ()
-@property (nonatomic, strong) REF_CLASS(RenderBase) m_render_engine;
-@property (nonatomic, strong) REF_CLASS(AudioEngine) m_audio_engine;
-
 @property (nonatomic, strong) NSThread *m_ffmpegQueue;
 @property (nonatomic, copy) NSString *m_path4video;
 @property (nonatomic, strong) NSError *m_err;
@@ -105,6 +102,9 @@
     int err = ERR_SUCCESS;
     const char *filename = NULL;
     
+    REF_CLASS(RenderBase) render_engine = nil;
+    REF_CLASS(AudioEngine) audio_engine = nil;
+    
     CBRA([path isKindOfClass:[NSString class]]);
     
     // priority
@@ -131,8 +131,40 @@
     CBRA(err >= ERR_SUCCESS);
     FFMLOG(@"Found stream info");
     
+    // go through each streams
+    for(int i = 0; i < avfContext->nb_streams; i++)
+    {
+        AVCodecContext *enc = avfContext->streams[i]->codec;
+        avfContext->streams[i]->discard = AVDISCARD_ALL;
+        
+        switch(enc->codec_type)
+        {
+            case CODEC_TYPE_VIDEO:
+            {
+                ret = [render_engine attachTo:avfContext->streams[i] err:&err];
+                break;
+            }
+            case CODEC_TYPE_AUDIO:
+            {
+                ret = [audio_engine attachTo:avfContext->streams[i] err:&err];
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    CBRA(ret);
+    
+    
 ERROR:
     [self __reportError:err note:nil];
+    
+DONE:
+    if (avfContext)
+    {
+        avformat_close_input(&avfContext);
+        avfContext = NULL;
+    }
     
     return;
 }

@@ -10,4 +10,11 @@
 
 @implementation DEF_CLASS(AudioEngine)
 
+- (BOOL)attachTo:(AVStream*)stream err:(int*)errCode
+{
+    stream->discard = AVDISCARD_NONE;   // AVDISCARD_DEFAULT
+    
+    return YES;
+}
+
 @end
