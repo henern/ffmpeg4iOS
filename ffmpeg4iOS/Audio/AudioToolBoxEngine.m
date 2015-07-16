@@ -146,7 +146,7 @@ ERROR:
     
     for (int i = 0; i < AUDIO_BUFFER_QUANTITY; i++)
     {
-        AudioQueueFreeBuffer(m_audioQueue, m_audioBuffers[i]);
+        // AudioQueueDispose will free the buffer
         m_audioBuffers[i] = NULL;
     }
 
