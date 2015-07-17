@@ -19,9 +19,9 @@
 
 @implementation DEF_CLASS(OpenGLRender)
 
-- (BOOL)attachTo:(AVStream*)stream err:(int*)errCode
+- (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index
 {
-    BOOL ret = [super attachTo:stream err:errCode];
+    BOOL ret = [super attachTo:stream err:errCode atIndex:index];
     CBRA(ret);
     
     ret = [self __setup2stream:stream err:errCode];

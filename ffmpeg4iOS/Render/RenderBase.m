@@ -11,14 +11,15 @@
 
 @implementation DEF_CLASS(RenderBase)
 
-- (BOOL)attachTo:(AVStream*)stream err:(int*)errCode
+- (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index
 {
     BOOL ret = YES;
     AVCodecContext *enc = NULL;
     int err = ERR_SUCCESS;
     
-    stream->discard = AVDISCARD_NONE;       // AVDISCARD_DEFAULT
-    
+    ret = [super attachTo:stream err:errCode atIndex:index];
+    CBRA(ret);
+        
     // aspect ratio
     float ratio = av_q2d(stream->codec->sample_aspect_ratio);
     if (!ratio)
@@ -50,7 +51,19 @@ ERROR:
         *errCode = err;
     }
     
+    if (!ret)
+    {
+        [self cleanup];
+    }
+    
     return ret;
+}
+
+- (void)cleanup
+{
+    [super cleanup];
+        
+    self.aspectRatio = 0.f;
 }
 
 @end

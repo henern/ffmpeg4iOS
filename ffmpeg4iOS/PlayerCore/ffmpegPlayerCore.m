@@ -141,12 +141,12 @@
         {
             case CODEC_TYPE_VIDEO:
             {
-                ret = [render_engine attachTo:avfContext->streams[i] err:&err];
+                ret = [render_engine attachTo:avfContext->streams[i] err:&err atIndex:i];
                 break;
             }
             case CODEC_TYPE_AUDIO:
             {
-                ret = [audio_engine attachTo:avfContext->streams[i] err:&err];
+                ret = [audio_engine attachTo:avfContext->streams[i] err:&err atIndex:i];
                 break;
             }
             default:
@@ -189,6 +189,70 @@ DONE:
     });
     
     FFMLOG(@"ERROR CODE:%d, %@", errCode, note);
+}
+
+- (void)__sync_readPacket4context:(AVFormatContext*)avfContext
+                           render:(REF_CLASS(RenderBase))render_egine
+                            audio:(REF_CLASS(AudioEngine))audio_engine
+{
+    BOOL ret = YES;
+    AVPacket packet = {0};
+    int err = ERR_SUCCESS;
+    
+    while (1)
+    {
+        err = av_read_frame(avfContext, &packet);
+        if (err != ERR_SUCCESS)
+        {
+            if (err == AVERROR(EAGAIN) && avfContext->pb->error == AVERROR(EAGAIN))
+            {
+                avfContext->pb->eof_reached = 0;
+                avfContext->pb->error = 0;
+            }
+            
+            break;
+        }
+        
+        if (avfContext->pb->eof_reached &&
+            avfContext->pb->error == AVERROR(EAGAIN))
+        {
+            avfContext->pb->eof_reached = 0;
+            avfContext->pb->error = 0;
+        }
+        
+        // unable to handle, discard
+        if (![render_egine canHandlePacket:&packet] &&
+            ![audio_engine canHandlePacket:&packet])
+        {
+            av_free_packet(&packet);
+            continue;
+        }
+        
+        // check the header
+        err = av_dup_packet(&packet);
+        CCBRA(err >= ERR_SUCCESS);
+        
+        // push to target engine
+        if ([render_egine canHandlePacket:&packet])
+        {
+            ret = [render_egine appendPacket:&packet];
+        }
+        else if ([audio_engine canHandlePacket:&packet])
+        {
+            ret = [audio_engine appendPacket:&packet];
+        }
+        else
+        {
+            VBR(0);
+            ret = NO;
+        }
+        CCBRA(ret);
+        
+        break;
+    }
+    
+ERROR:
+    return;
 }
 
 @end

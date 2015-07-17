@@ -7,10 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "libavformat/avformat.h"
+#import "AVStreamEngine.h"
 
-@interface DEF_CLASS(AudioEngine) : NSObject
-
-- (BOOL)attachTo:(AVStream*)stream err:(int*)errCode;
+@interface DEF_CLASS(AudioEngine) : DEF_CLASS(AVStreamEngine)
 
 @end

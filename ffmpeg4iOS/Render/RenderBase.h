@@ -7,13 +7,11 @@
 //
 
 #import <UIKit/UIKit.h>
-#import "libavformat/avformat.h"
+#import "AVStreamEngine.h"
 
-@interface DEF_CLASS(RenderBase) : NSObject
+@interface DEF_CLASS(RenderBase) : DEF_CLASS(AVStreamEngine)
 
 @property (nonatomic, assign) float aspectRatio;
 @property (nonatomic, assign) CGRect bounds;
-
-- (BOOL)attachTo:(AVStream*)stream err:(int*)errCode;
 
 @end

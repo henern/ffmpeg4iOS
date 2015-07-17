@@ -21,9 +21,6 @@ void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueu
 {
     AudioQueueRef m_audioQueue;
     AudioQueueBufferRef m_audioBuffers[AUDIO_BUFFER_QUANTITY];
-    
-    NSMutableArray *m_audioPacketQueue;
-    NSLock *m_audioPacketQueueLock;
 }
 
 @end
@@ -32,12 +29,12 @@ void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueu
 
 - (void)dealloc
 {
-    [self __cleanup];
+    [self cleanup];
 }
 
-- (BOOL)attachTo:(AVStream *)stream err:(int *)errCode
+- (BOOL)attachTo:(AVStream *)stream err:(int *)errCode atIndex:(int)index
 {
-    BOOL ret = [super attachTo:stream err:errCode];
+    BOOL ret = [super attachTo:stream err:errCode atIndex:index];
     CBRA(ret);
     
     ret = [self __setup2stream:stream err:errCode];
@@ -113,15 +110,12 @@ ERROR:
                                                              m_audioBuffers + i);
         CBRA(err != ERR_SUCCESS);
     }
-    
-    m_audioPacketQueue = [[NSMutableArray alloc] init];
-    m_audioPacketQueueLock = [[NSLock alloc] init];
 
 ERROR:
     if (!ret)
     {
         stream->discard = AVDISCARD_ALL;
-        [self __cleanup];
+        [self cleanup];
     }
 
     if (!ret && errCode)
@@ -133,13 +127,11 @@ ERROR:
     return ret;
 }
 
-- (void)__cleanup
+- (void)cleanup
 {
     if (!m_audioQueue)
     {
         VBR(m_audioBuffers[0] == NULL);
-        VBR(m_audioPacketQueue == nil);
-        VBR(m_audioPacketQueueLock == nil);
         
         return;
     }
@@ -153,10 +145,7 @@ ERROR:
     AudioQueueDispose(m_audioQueue, YES);
     m_audioQueue = NULL;
     
-    m_audioPacketQueue = nil;
-    
-    [m_audioPacketQueueLock unlock];
-    m_audioPacketQueueLock = nil;
+    [super cleanup];
 }
 @end
 

@@ -10,11 +10,41 @@
 
 @implementation DEF_CLASS(AudioEngine)
 
-- (BOOL)attachTo:(AVStream*)stream err:(int*)errCode
+- (BOOL)appendPacket:(AVPacket *)pkt
 {
-    stream->discard = AVDISCARD_NONE;   // AVDISCARD_DEFAULT
+    [super appendPacket:pkt];
     
-    return YES;
+#if 0
+    if (!audioDTSQuotient && packet.dts > 0)
+    {
+        audioDTSQuotient = packet.dts;
+    }
+    
+    if (audioDTSQuotient > 0)
+    {
+        packet.dts /= audioDTSQuotient;
+    }
+    
+    if (packet.dts < 0) {
+        packet.dts = 0;
+    }
+    
+    if (prevAudioDts > packet.dts) {
+        audioDtsOffset += prevAudioDts - packet.dts;
+    }
+    prevAudioDts = packet.dts;
+    
+    packet.dts += audioDtsOffset;
+    
+    [audioPacketQueueLock lock];
+    audioPacketQueueSize += packet.size;
+    [audioPacketQueue addObject:[NSMutableData dataWithBytes:&packet length:sizeof(packet)]];
+    [audioPacketQueueLock unlock];
+    
+    if (emptyAudioBuffer) {
+        [self fillAudioBuffer:emptyAudioBuffer];
+    }
+#endif
 }
 
 @end

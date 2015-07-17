@@ -11,8 +11,7 @@
 
 // class
 #define DEF_COMBINE(name, prefix)   prefix##name
-#define DEF_CLASS_PREFIX        WW
-#define DEF_CLASS(name)         DEF_COMBINE(name, DEF_CLASS_PREFIX)
+#define DEF_CLASS(name)         DEF_COMBINE(name, WW /* prefix */)
 #define REF_CLASS(name)         DEF_CLASS(name)*
 
 // log
