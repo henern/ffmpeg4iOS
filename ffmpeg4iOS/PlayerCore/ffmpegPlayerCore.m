@@ -290,6 +290,8 @@ DONE:
         {
             VBR(0);
             ret = NO;
+            
+            av_free_packet(&packet);
         }
         CCBRA(ret);
         

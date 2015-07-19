@@ -9,11 +9,11 @@
 #ifndef ffmpeg4iOS_ehm_h
 #define ffmpeg4iOS_ehm_h
 
-#define VBR(x)      NSAssert((x), @"ERROR")
-#define VPR(p)      NSAssert(nil != (p), @"ERROR")
-#define VMAINTHREAD()       NSAssert([NSThread isMainThread], @"ERROR (MUST run in main-thread)")
+#define VBR(x)      assert((x))
+#define VPR(p)      assert(nil != (p))
+#define VMAINTHREAD()       assert([NSThread isMainThread])
 
-#define VGLERR()    NSAssert(GL_NO_ERROR == glGetError(), @"OGL ERROR")
+#define VGLERR()    assert(GL_NO_ERROR == glGetError())
 #define OGLRET      (GL_NO_ERROR == glGetError())
 
 #define UNUSE(x)    ((void)(x))

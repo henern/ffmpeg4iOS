@@ -13,14 +13,15 @@
 #define AUDIO_BUFFER_QUANTITY       3
 #define AUDIO_BUFFER_SECONDS        1
 
-void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueueBufferRef buffer)
-{
-}
+void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueueBufferRef buffer);
 
 @interface DEF_CLASS(AudioToolBoxEngine) ()
 {
     AudioQueueRef m_audioQueue;
     AudioQueueBufferRef m_audioBuffers[AUDIO_BUFFER_QUANTITY];
+    BOOL m_flagBufferInQueue[AUDIO_BUFFER_QUANTITY];
+    
+    BOOL m_reprimeQueue;
 }
 
 @end
@@ -44,6 +45,19 @@ ERROR:
     return ret;
 }
 
+- (BOOL)appendPacket:(AVPacket *)pkt
+{
+    BOOL ret = [super appendPacket:pkt];
+    CBRA(ret);
+    
+    ret = [self __try2refillBuffers];
+    CBRA(ret);
+    
+ERROR:
+    return ret;
+}
+
+#pragma mark private
 #define UNKNOWN_CODEC_ID        (-1)
 - (BOOL)__setup2stream:(AVStream*)stream err:(int *)errCode
 {
@@ -52,8 +66,12 @@ ERROR:
     int err = ERR_SUCCESS;
     AudioStreamBasicDescription audioFormat = {0};
     
-    AVCodecContext *codec = stream->codec;
+    AVCodecContext *codec = [self ctx_codec];
     CPRA(codec);
+    
+    // clean
+    ret = [self reset];
+    VBR(ret);
     
     audioFormat.mFormatID = UNKNOWN_CODEC_ID;
     audioFormat.mSampleRate = codec->sample_rate;
@@ -73,6 +91,7 @@ ERROR:
             audioFormat.mFormatID = kAudioFormatAC3;
             break;
         default:
+            // FIXME: oops hw decoder is NOT available.
             FFMLOG(@"Error: audio format %d is not supported", codec->codec_id);
             audioFormat.mFormatID = kAudioFormatAC3;
             break;
@@ -127,6 +146,120 @@ ERROR:
     return ret;
 }
 
+- (BOOL)__fillBuffer:(AudioQueueBufferRef)buffer
+{
+    BOOL ret = YES;
+    OSStatus err = ERR_SUCCESS;
+    AudioTimeStamp bufStartTime = {0};
+    
+    // init
+    buffer->mAudioDataByteSize = 0;
+    buffer->mPacketDescriptionCount = 0;
+    
+    while (buffer->mPacketDescriptionCount < buffer->mPacketDescriptionCapacity)
+    {
+        AVPacket *top = [self topPacket];
+        if (!top && buffer->mPacketDescriptionCount == 0)
+        {
+            // FIXME: queue is empty, block?
+            sleep(1);
+            continue;
+        }
+                
+        if (top &&
+            buffer->mAudioDataBytesCapacity - buffer->mAudioDataByteSize >= top->size)
+        {
+            int indx_pkt_in_buf = 0;
+            
+            AVPacket pkt = {0};
+            ret = [self popPacket:&pkt];
+            CBRA(ret);
+            
+            // append one packet-description
+            indx_pkt_in_buf = buffer->mPacketDescriptionCount;
+            buffer->mPacketDescriptionCount++;
+            
+            if (indx_pkt_in_buf == 0)
+            {
+                bufStartTime.mSampleTime = pkt.dts * [self ctx_codec]->frame_size;
+                bufStartTime.mFlags = kAudioTimeStampSampleTimeValid;
+            }
+            
+            memcpy((uint8_t *)buffer->mAudioData + buffer->mAudioDataByteSize, pkt.data, pkt.size);
+            buffer->mPacketDescriptions[indx_pkt_in_buf].mStartOffset = buffer->mAudioDataByteSize;
+            buffer->mPacketDescriptions[indx_pkt_in_buf].mDataByteSize = pkt.size;
+            buffer->mPacketDescriptions[indx_pkt_in_buf].mVariableFramesInPacket = [self ctx_codec]->frame_size;
+            
+            // sum
+            buffer->mAudioDataByteSize += pkt.size;
+            
+            // free
+            av_free_packet(&pkt);
+            
+            // try to fill more
+            continue;
+        }
+        
+        break;
+    }
+    
+    CBRA(buffer->mPacketDescriptionCount > 0);
+    
+    FFMLOG_OC(@"enqueue a buffer with #%d packets, at %lf", buffer->mPacketDescriptionCount, bufStartTime.mSampleTime);
+    err = AudioQueueEnqueueBufferWithParameters(m_audioQueue,
+                                                buffer,
+                                                0,
+                                                NULL,
+                                                0, 0, 0,
+                                                NULL,
+                                                &bufStartTime,
+                                                NULL);
+    CBRA(err == ERR_SUCCESS);
+    
+ERROR:
+    return ret;
+}
+
+- (BOOL)__try2refillBuffers
+{
+    BOOL ret = YES;
+    int err = ERR_SUCCESS;
+    
+    if (!m_reprimeQueue)
+    {
+        return YES;
+    }
+    
+    for (int i = 0; i < AUDIO_BUFFER_QUANTITY; i++)
+    {
+        if (m_flagBufferInQueue[i])
+        {
+            continue;
+        }
+
+        if (m_audioBuffers[i] == NULL)
+        {
+            VBR(0);
+            return NO;
+        }
+        
+        m_flagBufferInQueue[i] = YES;
+        return [self __fillBuffer:m_audioBuffers[i]];
+    }
+    
+    err = AudioQueuePrime(m_audioQueue, 0, NULL);
+    CBRA(err == ERR_SUCCESS);
+    m_reprimeQueue = NO;
+    
+    // FIXME: start immediately?
+    err = AudioQueueStart(m_audioQueue, NULL);
+    CBRA(err == ERR_SUCCESS);
+    
+ERROR:
+    return YES;
+}
+
+#pragma mark clean
 - (void)cleanup
 {
     if (!m_audioQueue)
@@ -150,9 +283,28 @@ ERROR:
 
 - (BOOL)reset
 {
-    AudioQueueStop(m_audioQueue, YES);
+    if (m_audioQueue)
+    {
+        AudioQueueStop(m_audioQueue, YES);
+    }
+    
+    for (int i = 0; i < AUDIO_BUFFER_QUANTITY; i++)
+    {
+        m_flagBufferInQueue[i] = NO;
+    }
+    m_reprimeQueue = YES;
+    
     return [super reset];
 }
 
 @end
 
+void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueueBufferRef buffer)
+{
+    REF_CLASS(AudioToolBoxEngine) engine = (__bridge REF_CLASS(AudioToolBoxEngine))info;
+    VBR([engine isKindOfClass:[DEF_CLASS(AudioToolBoxEngine) class]]);
+    
+    BOOL ret = [engine __fillBuffer:buffer];
+    VBR(ret);
+    UNUSE(ret);
+}

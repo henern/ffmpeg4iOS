@@ -123,6 +123,16 @@ ERROR:
     return [self.pkt_queue appendPacket:pkt];
 }
 
+- (BOOL)popPacket:(AVPacket*)destPkt
+{
+    return [self.pkt_queue popPacket:destPkt];
+}
+
+- (AVPacket*)topPacket
+{
+    return [self.pkt_queue topPacket];
+}
+
 - (AVCodecContext *)ctx_codec
 {
     return m_ctx_codec;

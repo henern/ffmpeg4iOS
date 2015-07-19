@@ -23,6 +23,8 @@
 - (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index;
 - (BOOL)canHandlePacket:(AVPacket *)pkt;
 - (BOOL)appendPacket:(AVPacket *)pkt;
+- (BOOL)popPacket:(AVPacket*)destPkt;
+- (AVPacket*)topPacket;
 
 - (BOOL)reset;
 

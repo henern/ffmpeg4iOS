@@ -15,6 +15,9 @@
 - (UInt32)length;           // how many
 
 - (BOOL)appendPacket:(AVPacket*)pkt;
+- (BOOL)popPacket:(AVPacket*)destPkt;
+- (AVPacket*)topPacket;
+
 - (BOOL)reset;
 
 @end

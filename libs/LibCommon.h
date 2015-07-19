@@ -21,6 +21,8 @@
 #define FFMLOG(...)
 #endif
 
+#define FFMLOG_OC(fmt, ...)     FFMLOG([NSString stringWithFormat:@"[%@] %@", [self class], fmt], __VA_ARGS__)
+
 // weak
 #define DEF_WEAK_SELF()         __weak typeof(self) weak_self = self
 

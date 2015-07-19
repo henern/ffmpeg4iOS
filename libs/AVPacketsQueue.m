@@ -13,7 +13,7 @@
 
 @interface DEF_CLASS(AVPacketsQueue) ()
 {
-    UInt32 m_queueSize;
+    int64_t m_queueSize;
     NSMutableArray *m_queue;
 }
 
@@ -43,6 +43,44 @@
     // FIXME: need a lock here?
     m_queueSize += pkt->size;
     [m_queue addObject:[NSMutableData dataWithBytes:pkt length:sizeof(*pkt)]];
+    
+ERROR:
+    return ret;
+}
+
+- (AVPacket*)topPacket
+{
+    // FIXME: lock?
+    NSMutableData *iter = [m_queue firstObject];
+    VBR(!iter || iter.length == sizeof(AVPacket));
+    
+    if (iter.length == sizeof(AVPacket))
+    {
+        return (AVPacket*)[iter bytes];
+    }
+    
+    return NULL;
+}
+
+- (BOOL)popPacket:(AVPacket *)destPkt
+{
+    BOOL ret = YES;
+    NSMutableData *iter = nil;
+    
+    CPRA(destPkt);
+    CBRA(m_queueSize > 0);
+    CBRA([m_queue count] > 0);
+    
+    // FIXME: lock?
+    iter = [m_queue firstObject];
+    CPRA(iter);
+    CBRA(iter.length == sizeof(*destPkt));
+    
+    m_queueSize -= iter.length;
+    [m_queue removeObject:iter];
+    CBRA(m_queueSize > 0);
+    
+    memcpy(destPkt, [iter bytes], sizeof(*destPkt));
     
 ERROR:
     return ret;
