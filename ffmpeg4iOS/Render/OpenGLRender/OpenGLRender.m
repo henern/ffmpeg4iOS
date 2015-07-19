@@ -100,6 +100,7 @@ ERROR:
     BOOL ret = YES;
     int err = ERR_SUCCESS;
     
+    // FIXME: we need sync the video with audio!
     int finished = 0;
     AVFrame *avpicYUV = av_frame_alloc();
     AVFrame *avfDecoded = av_frame_alloc();

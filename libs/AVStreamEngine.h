@@ -16,6 +16,7 @@
 @property (nonatomic, assign) int index_stream;
 @property (nonatomic, strong) REF_CLASS(AVPacketsQueue) pkt_queue;
 @property (nonatomic, assign, readonly) AVCodecContext *ctx_codec;
+@property (nonatomic, assign) AVCodec *ref_codec;
 
 - (void)cleanup;
 

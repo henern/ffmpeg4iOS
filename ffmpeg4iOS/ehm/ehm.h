@@ -16,6 +16,8 @@
 #define VGLERR()    NSAssert(GL_NO_ERROR == glGetError(), @"OGL ERROR")
 #define OGLRET      (GL_NO_ERROR == glGetError())
 
+#define UNUSE(x)    ((void)(x))
+
 /*
  *  check macros
  */

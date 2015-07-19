@@ -22,9 +22,6 @@
 - (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index
 {
     BOOL ret = YES;
-    AVCodecContext *enc = NULL;
-    AVCodec *codec = NULL;
-    int err = ERR_SUCCESS;
     
     ret = [super attachTo:stream err:errCode atIndex:index];
     CBRA(ret);
@@ -43,27 +40,8 @@
     }
     
     self.aspectRatio = ratio;
-    
-    // codec
-    enc = stream->codec;
-    CPRA(enc);
-    
-    codec = avcodec_find_decoder(enc->codec_id);
-    CPRA(codec);
-    
-    // MUST copy the ctx?
-    err = avcodec_open2(enc, codec, NULL);
-    CBRA(err >= ERR_SUCCESS);
-    
-    // keep ref
-    self.ref_codec = codec;
-    
-ERROR:
-    if (!ret && errCode)
-    {
-        *errCode = err;
-    }
-    
+        
+ERROR:    
     if (!ret)
     {
         [self cleanup];
