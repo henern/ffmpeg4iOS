@@ -1,17 +1,21 @@
 #!/bin/tcsh -f
 #!export PATH=$PATH:/Applications/Xcode.app/Contents/Developer/usr/bin:/usr/bin
 
-#use x86_64 instead of i386, which is available since iPhone5s
-set ARCH=x86_64
+# make sure gas-preprocessor.pl in in /usr/local/bin/
 
-#base on iOS8.2 SDK
-set BASE_SDK_VER="8.2"
-set BASE_SDK_PLAT="iPhoneSimulator"
+# these enviroment variables are required
+# export ARCH=x86_64
+# export CPU=x86_64
+# export BASE_SDK_VER="8.2"
+# export BASE_SDK_PLAT="iPhoneSimulator"
+
+#sys-root
 set SYS_ROOT="/Applications/Xcode.app/Contents/Developer/Platforms/${BASE_SDK_PLAT}.platform/Developer/SDKs/${BASE_SDK_PLAT}${BASE_SDK_VER}.sdk"
 
 #at least iOS5.0
 set MIN_IOS_VER=5.0
 set EXTFLAGS_LD="-miphoneos-version-min=${MIN_IOS_VER}"
+set EXTFLAGS_CC="-miphoneos-version-min=${MIN_IOS_VER}"
 
 set xbinDir="/Applications/Xcode.app/Contents/Developer/usr/bin"
 
@@ -33,11 +37,12 @@ $xbinDir/make clean
 ./configure \
 --cc=/Applications/Xcode.app/Contents/Developer/usr/bin/gcc \
 --as='/usr/local/bin/gas-preprocessor.pl /Applications/Xcode.app/Contents/Developer/usr/bin/gcc' \
+--nm="/Applications/Xcode.app/Contents/Developer/Platforms/${BASE_SDK_PLAT}.platform/Developer/usr/bin/nm" \
 --sysroot="${SYS_ROOT}" \
 --target-os=darwin \
 --arch="${ARCH}" \
---cpu="${ARCH}" \
---extra-cflags="-arch ${ARCH}" \
+--cpu="${CPU}" \
+--extra-cflags="-arch ${ARCH} ${EXTFLAGS_CC} -mdynamic-no-pic" \
 --extra-ldflags="-arch ${ARCH} ${EXTFLAGS_LD} -isysroot ${SYS_ROOT}" \
 --prefix="compiled/${ARCH}" \
 --enable-cross-compile \
