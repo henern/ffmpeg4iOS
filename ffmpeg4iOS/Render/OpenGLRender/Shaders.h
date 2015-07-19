@@ -10,8 +10,8 @@
 #define ffmpeg4iOS_Shaders_h
 
 #define STRINGIFY(a)    #a
-#import "../Shader/YUV2RGB.frag"
-#import "../Shader/YUV2RGB.vert"
+#import "./Shader/YUV2RGB.frag"
+#import "./Shader/YUV2RGB.vert"
 #define FRAGMENT_SHADER     fragmentShader
 #define VERTEX_SHADER       vertexShader
 
