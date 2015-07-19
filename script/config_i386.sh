@@ -29,7 +29,7 @@ $xbinDir/make clean
 --arch=i386 \
 --cpu=i386 \
 --extra-cflags='-arch i386' \
---extra-ldflags='-arch i386 ${EXTFLAGS_LD} -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.2.sdk' \
+--extra-ldflags="-arch i386 ${EXTFLAGS_LD} -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.2.sdk" \
 --prefix=compiled/i386 \
 --enable-cross-compile \
 --enable-nonfree \
