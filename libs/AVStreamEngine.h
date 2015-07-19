@@ -15,11 +15,14 @@
 @property (nonatomic, assign) AVStream *ref_stream;
 @property (nonatomic, assign) int index_stream;
 @property (nonatomic, strong) REF_CLASS(AVPacketsQueue) pkt_queue;
+@property (nonatomic, assign, readonly) AVCodecContext *ctx_codec;
 
 - (void)cleanup;
 
 - (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index;
 - (BOOL)canHandlePacket:(AVPacket *)pkt;
 - (BOOL)appendPacket:(AVPacket *)pkt;
+
+- (BOOL)reset;
 
 @end

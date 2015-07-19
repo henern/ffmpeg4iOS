@@ -13,5 +13,9 @@
 
 @property (nonatomic, assign) float aspectRatio;
 @property (nonatomic, assign) CGRect bounds;
+@property (nonatomic, assign) AVCodec *ref_codec;
+@property (nonatomic, weak) UIView *ref_drawingView;            // weak ref to UIView
+
+- (BOOL)attachToView:(UIView*)view;
 
 @end

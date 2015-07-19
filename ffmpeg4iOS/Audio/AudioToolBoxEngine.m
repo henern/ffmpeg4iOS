@@ -99,16 +99,16 @@ ERROR:
     // allocate audio buffers
     for (int i = 0; i < AUDIO_BUFFER_QUANTITY; i++)
     {
-        UInt32 bufferByteSize = (int)(codec->bit_rate * AUDIO_BUFFER_SECONDS / 8);
-        UInt32 numberPacket = (int)(codec->sample_rate * AUDIO_BUFFER_SECONDS / codec->frame_size + 1);
+        uint32_t bufferByteSize = (int)(codec->bit_rate * AUDIO_BUFFER_SECONDS / 8);
+        uint32_t numberPacket = (int)(codec->sample_rate * AUDIO_BUFFER_SECONDS / codec->frame_size + 1);
         
-        FFMLOG(@"%d packet capacity, %d byte capacity", numberPacket, bufferByteSize);
+        FFMLOG(@"%u packet capacity, %d byte capacity", numberPacket, bufferByteSize);
         
         err = AudioQueueAllocateBufferWithPacketDescriptions(m_audioQueue,
                                                              bufferByteSize,
                                                              numberPacket,
                                                              m_audioBuffers + i);
-        CBRA(err != ERR_SUCCESS);
+        CBRA(err == ERR_SUCCESS);
     }
 
 ERROR:
@@ -147,5 +147,12 @@ ERROR:
     
     [super cleanup];
 }
+
+- (BOOL)reset
+{
+    AudioQueueStop(m_audioQueue, YES);
+    return [super reset];
+}
+
 @end
 

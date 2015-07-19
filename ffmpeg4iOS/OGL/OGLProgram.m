@@ -10,7 +10,7 @@
 #import <OpenGLES/EAGLDrawable.h>
 #import <QuartzCore/QuartzCore.h>
 
-@interface OGLProgram ()
+@interface DEF_CLASS(OGLProgram) ()
 {
     GLuint _prgrmOGL;
 }
@@ -20,7 +20,7 @@
 
 @end
 
-@implementation OGLProgram
+@implementation DEF_CLASS(OGLProgram)
 
 - (id)initWithVertShader:(const char*)vertShdr fragShader:(const char*)fragShdr
 {

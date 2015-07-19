@@ -11,10 +11,19 @@
 
 @implementation DEF_CLASS(RenderBase)
 
+- (BOOL)attachToView:(UIView *)view
+{
+    view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    self.ref_drawingView = view;
+    
+    return ([self.ref_drawingView isKindOfClass:[UIView class]]);
+}
+
 - (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index
 {
     BOOL ret = YES;
     AVCodecContext *enc = NULL;
+    AVCodec *codec = NULL;
     int err = ERR_SUCCESS;
     
     ret = [super attachTo:stream err:errCode atIndex:index];
@@ -39,11 +48,15 @@
     enc = stream->codec;
     CPRA(enc);
     
-    AVCodec *codec = avcodec_find_decoder(enc->codec_id);
+    codec = avcodec_find_decoder(enc->codec_id);
     CPRA(codec);
     
+    // MUST copy the ctx?
     err = avcodec_open2(enc, codec, NULL);
     CBRA(err >= ERR_SUCCESS);
+    
+    // keep ref
+    self.ref_codec = codec;
     
 ERROR:
     if (!ret && errCode)
@@ -62,7 +75,8 @@ ERROR:
 - (void)cleanup
 {
     [super cleanup];
-        
+    
+    self.ref_codec = NULL;
     self.aspectRatio = 0.f;
 }
 

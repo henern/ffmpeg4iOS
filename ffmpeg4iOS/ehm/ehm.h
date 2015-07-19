@@ -11,8 +11,10 @@
 
 #define VBR(x)      NSAssert((x), @"ERROR")
 #define VPR(p)      NSAssert(nil != (p), @"ERROR")
+#define VMAINTHREAD()       NSAssert([NSThread isMainThread], @"ERROR (MUST run in main-thread)")
 
 #define VGLERR()    NSAssert(GL_NO_ERROR == glGetError(), @"OGL ERROR")
+#define OGLRET      (GL_NO_ERROR == glGetError())
 
 /*
  *  check macros

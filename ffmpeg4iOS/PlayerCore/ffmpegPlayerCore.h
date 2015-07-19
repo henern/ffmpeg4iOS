@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "LibCommon.h"
 
 @interface DEF_CLASS(ffmpegPlayerCore) : UIView
 

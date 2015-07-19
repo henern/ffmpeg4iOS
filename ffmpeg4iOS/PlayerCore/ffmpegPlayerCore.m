@@ -7,16 +7,22 @@
 //
 
 #import "ffmpegPlayerCore.h"
-#import <QuartzCore/QuartzCore.h>
-#import "RenderBase.h"
-#import "AudioEngine.h"
 #import "ehm.h"
 #import "libavcodec/avcodec.h"
 #import "libavdevice/avdevice.h"
 #import "libavformat/avio.h"
 #import "libswscale/swscale.h"
+#import "RenderBase+Factory.h"
+#import "AudioEngine+Factory.h"
+
+#define DEFAULT_STREAM          (-1)
 
 @interface DEF_CLASS(ffmpegPlayerCore) ()
+{
+    BOOL m_shouldSeek;
+    float m_pendingSeekTo;
+}
+
 @property (nonatomic, strong) NSThread *m_ffmpegQueue;
 @property (nonatomic, copy) NSString *m_path4video;
 @property (nonatomic, strong) NSError *m_err;
@@ -27,10 +33,18 @@
 
 + (Class)layerClass
 {
-    return [CAEAGLLayer class];
+    return [DEF_CLASS(RenderBase) renderLayerClass];
 }
 
 #pragma mark setup
++ (void)initialize
+{
+    [super initialize];
+    
+    // register ffmpeg once
+    av_register_all();
+}
+
 - (instancetype)initWithFrame:(CGRect)frame path:(NSString *)path4video
 {
     self = [super initWithFrame:frame];
@@ -52,6 +66,8 @@
 
 - (void)__setup
 {
+    VMAINTHREAD();
+    
     [self __cleanup];
     
     self.m_ffmpegQueue = [[NSThread alloc] initWithTarget:self
@@ -102,10 +118,13 @@
     int err = ERR_SUCCESS;
     const char *filename = NULL;
     
-    REF_CLASS(RenderBase) render_engine = nil;
-    REF_CLASS(AudioEngine) audio_engine = nil;
+    REF_CLASS(RenderBase) render_engine = [DEF_CLASS(RenderBase) engine];
+    REF_CLASS(AudioEngine) audio_engine = [DEF_CLASS(AudioEngine) engine];
     
     CBRA([path isKindOfClass:[NSString class]]);
+    
+    // attach to view
+    [render_engine attachToView:self];
     
     // priority
     [NSThread setThreadPriority:1];
@@ -113,9 +132,6 @@
     // c point to path
     filename = [path UTF8String];
     CPRA(filename);
-    
-    // register ffmpeg
-    av_register_all();
     
     // open the video stream
 #ifdef _USE_DEPRECATED_FFMPEG_METHODS
@@ -155,9 +171,38 @@
     }
     CBRA(ret);
     
+    // loop to consume the packets
+    while (1)
+    {
+        if (m_shouldSeek)
+        {
+            err = av_seek_frame(avfContext, DEFAULT_STREAM, m_pendingSeekTo * avfContext->duration, 0);
+            if (err < ERR_SUCCESS)
+            {
+                // just ignore
+                FFMLOG(@"ERROR (%d) while trying to seek #%f", err, m_pendingSeekTo);
+            }
+            else
+            {
+                ret = [render_engine reset];
+                CBRA(ret);
+                
+                ret = [audio_engine reset];
+                CBRA(ret);
+            }
+            
+            m_shouldSeek = NO;
+            m_pendingSeekTo = 0.f;
+        }
+        
+        [self __sync_readPacket4context:avfContext render:render_engine audio:audio_engine];
+    }
     
 ERROR:
-    [self __reportError:err note:nil];
+    if (!ret)
+    {
+        [self __reportError:err note:nil];
+    }
     
 DONE:
     if (avfContext)

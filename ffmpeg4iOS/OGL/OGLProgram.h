@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "OGLCommon.h"
 
-@interface OGLProgram : NSObject
+@interface DEF_CLASS(OGLProgram) : NSObject
 
 @property (nonatomic, assign) GLuint slotPosition;
 @property (nonatomic, assign) GLuint slotTexCoordIn;

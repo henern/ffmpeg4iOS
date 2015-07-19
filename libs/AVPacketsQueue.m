@@ -40,7 +40,7 @@
     CPRA(pkt);
     CBRA(pkt -> size > 0);
     
-    // need a lock here?
+    // FIXME: need a lock here?
     m_queueSize += pkt->size;
     [m_queue addObject:[NSMutableData dataWithBytes:pkt length:sizeof(*pkt)]];
     

@@ -12,7 +12,7 @@
 
 - (BOOL)appendPacket:(AVPacket *)pkt
 {
-    [super appendPacket:pkt];
+    return [super appendPacket:pkt];
     
 #if 0
     if (!audioDTSQuotient && packet.dts > 0)

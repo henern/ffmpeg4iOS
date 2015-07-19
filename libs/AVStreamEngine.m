@@ -23,10 +23,17 @@
 
 - (void)cleanup
 {
-    [self.pkt_queue reset];
+    [self reset];
     
     self.ref_stream = NULL;
     self.index_stream = 0;
+}
+
+- (BOOL)reset
+{
+    [self.pkt_queue reset];
+    
+    return YES;
 }
 
 - (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index
@@ -40,17 +47,22 @@
     self.ref_stream = stream;
     self.index_stream = index;
     
-    return (self.ref_stream != NULL && self.index_stream > 0);
+    return (self.ref_stream != NULL && self.index_stream >= 0);
 }
 
 - (BOOL)canHandlePacket:(AVPacket *)pkt
 {
-    return (self.index_stream > 0 && pkt->stream_index == self.index_stream);
+    return (self.index_stream >= 0 && pkt->stream_index == self.index_stream);
 }
 
 - (BOOL)appendPacket:(AVPacket *)pkt
 {
     return [self.pkt_queue appendPacket:pkt];
+}
+
+- (AVCodecContext *)ctx_codec
+{
+    return self.ref_stream->codec;
 }
 
 @end
