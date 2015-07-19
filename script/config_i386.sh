@@ -1,5 +1,9 @@
 #!/bin/tcsh -f
 #!export PATH=$PATH:/Applications/Xcode.app/Contents/Developer/usr/bin:/usr/bin
+
+set MIN_IOS_VER=5.0
+set EXTFLAGS_LD="-miphoneos-version-min=${MIN_IOS_VER}"
+
 set xbinDir="/Applications/Xcode.app/Contents/Developer/usr/bin"
 
 set targetDir_root="./ffmpeg-libs"
@@ -25,7 +29,7 @@ $xbinDir/make clean
 --arch=i386 \
 --cpu=i386 \
 --extra-cflags='-arch i386' \
---extra-ldflags='-arch i386 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.2.sdk' \
+--extra-ldflags='-arch i386 ${EXTFLAGS_LD} -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator8.2.sdk' \
 --prefix=compiled/i386 \
 --enable-cross-compile \
 --enable-nonfree \
