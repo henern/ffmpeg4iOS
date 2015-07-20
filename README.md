@@ -17,6 +17,10 @@ Samples
 -------
 coming soon
 
+License
+-------
+This project is licensed under the terms of the MIT license.
+
 Dependency
 ----------
 1. [ffmpeg](http://ffmpeg.org/download.html)
