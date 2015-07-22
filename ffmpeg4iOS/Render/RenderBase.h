@@ -16,5 +16,6 @@
 @property (nonatomic, weak) UIView *ref_drawingView;            // weak ref to UIView
 
 - (BOOL)attachToView:(UIView*)view;
+- (BOOL)drawFrame:(AVFrame *)avfDecoded enc:(AVCodecContext*)enc;
 
 @end

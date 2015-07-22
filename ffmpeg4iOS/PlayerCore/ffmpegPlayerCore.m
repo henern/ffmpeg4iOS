@@ -125,10 +125,7 @@
     
     // attach to view
     [render_engine attachToView:self];
-    
-    // priority
-    [NSThread setThreadPriority:1];
-    
+        
     // c point to path
     filename = [path UTF8String];
     CPRA(filename);

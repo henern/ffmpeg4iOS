@@ -39,6 +39,36 @@
     return [CAEAGLLayer class];
 }
 
+- (BOOL)drawFrame:(AVFrame *)avfDecoded enc:(AVCodecContext*)enc
+{
+    BOOL ret = YES;
+    int err = ERR_SUCCESS;
+    
+    AVFrame *avpicYUV = av_frame_alloc();
+    
+    CPRA(m_bufferYUV);
+    CPR(enc);
+    CBRA(m_bufferYUV.length >= [self __size_per_picture_YUV420P]);
+    
+    // binding
+    err = avpicture_fill((AVPicture*)avpicYUV, [m_bufferYUV mutableBytes], enc->pix_fmt, enc->width, enc->height);
+    CBRA(err >= 0);
+    
+    // copy from planes to plain buffer
+    av_picture_copy((AVPicture*)avpicYUV, (AVPicture *)avfDecoded, enc->pix_fmt, enc->width, enc->height);
+    
+    [self __drawYUV:[m_bufferYUV mutableBytes] width:enc->width height:enc->height];
+    
+ERROR:
+    if (avpicYUV)
+    {
+        av_frame_free(&avpicYUV);
+        avpicYUV = NULL;
+    }
+    
+    return ret;
+}
+
 - (BOOL)attachToView:(UIView *)view
 {
     BOOL ret = YES;
@@ -92,60 +122,6 @@ ERROR:
     CBRA(ret);
     
 ERROR:
-    return ret;
-}
-
-- (BOOL)appendPacket:(AVPacket *)pkt
-{
-    BOOL ret = YES;
-    int err = ERR_SUCCESS;
-    
-    // FIXME: we need sync the video with audio!
-    int finished = 0;
-    AVFrame *avpicYUV = av_frame_alloc();
-    AVFrame *avfDecoded = av_frame_alloc();
-    AVCodecContext *enc = [self ctx_codec];
-    
-    CPRA(m_bufferYUV);
-    CPR(enc);
-    CBRA(m_bufferYUV.length >= [self __size_per_picture_YUV420P]);
-    
-    err = avcodec_decode_video2(enc, avfDecoded, &finished, pkt);
-    CBRA(err >= 0);
-    
-    // FIXME: render only supports YUV420P now
-    CBRA(enc->pix_fmt == PIX_FMT_YUV420P);
-    
-    if (finished)
-    {
-        // binding
-        err = avpicture_fill((AVPicture*)avpicYUV, [m_bufferYUV mutableBytes], enc->pix_fmt, enc->width, enc->height);
-        CBRA(err >= 0);
-        
-        // copy from planes to plain buffer
-        av_picture_copy((AVPicture*)avpicYUV, (AVPicture *)avfDecoded, enc->pix_fmt, enc->width, enc->height);
-        
-        [self __drawYUV:[m_bufferYUV mutableBytes] width:enc->width height:enc->height];
-    }
-    
-#if 0
-    ret = [super appendPacket:pkt];
-    CBRA(ret);
-#endif
-    
-ERROR:
-    if (avfDecoded)
-    {
-        av_frame_free(&avfDecoded);
-        avfDecoded = NULL;
-    }
-    
-    if (avpicYUV)
-    {
-        av_frame_free(&avpicYUV);
-        avpicYUV = NULL;
-    }
-    
     return ret;
 }
 
