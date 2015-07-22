@@ -18,6 +18,9 @@
 
 #define UNUSE(x)    ((void)(x))
 
+#define VNOIMPL()   VBR(0)          // not implement
+#define VERROR()    VBR(0)          // error
+
 /*
  *  check macros
  */

@@ -40,9 +40,11 @@
     CPRA(pkt);
     CBRA(pkt -> size > 0);
     
-    // FIXME: need a lock here?
-    m_queueSize += pkt->size;
-    [m_queue addObject:[NSMutableData dataWithBytes:pkt length:sizeof(*pkt)]];
+    @synchronized(self)
+    {
+        m_queueSize += pkt->size;
+        [m_queue addObject:[NSMutableData dataWithBytes:pkt length:sizeof(*pkt)]];
+    }
     
 ERROR:
     return ret;
@@ -50,9 +52,13 @@ ERROR:
 
 - (AVPacket*)topPacket
 {
-    // FIXME: lock?
-    NSMutableData *iter = [m_queue firstObject];
-    VBR(!iter || iter.length == sizeof(AVPacket));
+    NSMutableData *iter = nil;
+    
+    @synchronized(self)
+    {
+        iter = [m_queue firstObject];
+        VBR(!iter || iter.length == sizeof(AVPacket));
+    }
     
     if (iter.length == sizeof(AVPacket))
     {
@@ -71,14 +77,16 @@ ERROR:
     CBRA(m_queueSize > 0);
     CBRA([m_queue count] > 0);
     
-    // FIXME: lock?
-    iter = [m_queue firstObject];
-    CPRA(iter);
-    CBRA(iter.length == sizeof(*destPkt));
-    
-    m_queueSize -= iter.length;
-    [m_queue removeObject:iter];
-    CBRA(m_queueSize > 0);
+    @synchronized(self)
+    {
+        iter = [m_queue firstObject];
+        CPRA(iter);
+        CBRA(iter.length == sizeof(*destPkt));
+        
+        m_queueSize -= iter.length;
+        [m_queue removeObject:iter];
+        CBRA(m_queueSize > 0);
+    }
     
     memcpy(destPkt, [iter bytes], sizeof(*destPkt));
     

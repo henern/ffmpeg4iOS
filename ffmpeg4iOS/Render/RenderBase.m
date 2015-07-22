@@ -164,18 +164,39 @@ ERROR:
     
     av_frame_move_ref(avfDecoded, avf);
     
-    // FIXME: we need sync the video with audio!
-    pts = avfDecoded->pts;
+    // pts from ffmpeg
+    pts = av_frame_get_best_effort_timestamp(avfDecoded);
     if (pts == AV_NOPTS_VALUE)
     {
-        pts = av_frame_get_best_effort_timestamp(avfDecoded);
+        pts = 0.f;
     }
     
     // FIXME: avfDecoded->repeat_pict ?
+    VBR(avfDecoded->repeat_pict == 0);
     
-    pts *= av_q2d(enc->time_base);
-    usleep((pts - m_last_pts) * MS_PER_SEC);
-    m_last_pts = pts;
+    // convert pts in second unit
+    pts *= [self time_base];
+    
+    // delay since previous frame
+    double delay = pts - m_last_pts;
+    if (delay > 0.f)
+    {
+        m_last_pts = pts;
+    }
+    else
+    {
+        delay = 0.01f;
+    }
+    VBR(delay > 0.f);
+    
+    // sync with sync-core
+    delay = [self delay4pts:pts delayInPlan:delay];
+    
+    // delay for this frame
+    if (delay > 0.f)
+    {
+        usleep(delay * MS_PER_SEC);
+    }
     
     ret = [self drawFrame:avfDecoded enc:enc];
     CBRA(ret);

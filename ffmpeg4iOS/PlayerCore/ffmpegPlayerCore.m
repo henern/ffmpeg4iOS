@@ -14,6 +14,7 @@
 #import "libswscale/swscale.h"
 #import "RenderBase+Factory.h"
 #import "AudioEngine+Factory.h"
+#import "AVClockSync.h"
 
 #define DEFAULT_STREAM          (-1)
 
@@ -120,6 +121,13 @@
     
     REF_CLASS(RenderBase) render_engine = [DEF_CLASS(RenderBase) engine];
     REF_CLASS(AudioEngine) audio_engine = [DEF_CLASS(AudioEngine) engine];
+    
+    // clock-sync
+    REF_CLASS(AVClockSync) syncCore = [[DEF_CLASS(AVClockSync) alloc] initWithVideo:render_engine
+                                                                              audio:audio_engine];
+    CPRA(syncCore);
+    render_engine.ref_synccore = syncCore;
+    audio_engine.ref_synccore = syncCore;
     
     CBRA([path isKindOfClass:[NSString class]]);
     

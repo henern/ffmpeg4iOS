@@ -57,6 +57,20 @@ ERROR:
     return ret;
 }
 
+- (double)timestamp
+{
+    AudioTimeStamp tmstmp = {0};
+    AudioQueueGetCurrentTime(m_audioQueue, NULL, &tmstmp, NULL);
+    
+    if ((tmstmp.mFlags & kAudioTimeStampSampleTimeValid) != 0)
+    {
+        // mSampleTime == how many samples have been played.
+        return tmstmp.mSampleTime / [self ctx_codec]->sample_rate;
+    }
+    
+    return 0.f;
+}
+
 #pragma mark private
 #define UNKNOWN_CODEC_ID        (-1)
 - (BOOL)__setup2stream:(AVStream*)stream err:(int *)errCode
@@ -181,7 +195,7 @@ ERROR:
             
             if (indx_pkt_in_buf == 0)
             {
-                bufStartTime.mSampleTime = pkt.dts * [self ctx_codec]->frame_size;
+                bufStartTime.mSampleTime = pkt.pts;
                 bufStartTime.mFlags = kAudioTimeStampSampleTimeValid;
             }
             

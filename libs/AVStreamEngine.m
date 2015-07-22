@@ -138,4 +138,37 @@ ERROR:
     return m_ctx_codec;
 }
 
+- (double)timestamp
+{
+    VNOIMPL();
+    return 0.f;
+}
+
+- (double)delay4pts:(double)pts delayInPlan:(double)delay
+{
+    if (!self.ref_synccore)
+    {
+        VERROR();
+        return delay;
+    }
+    
+    double diff = pts - [self.ref_synccore timestamp];
+    if (diff < -delay)
+    {
+        delay = 0.f;    // is slow
+    }
+    else if (diff > delay)
+    {
+        delay *= 2.0f;  // is ahead of the clock
+    }
+    
+    return delay;
+}
+
+- (double)time_base
+{
+    // stream->time_base is good, NOT enc->time_base!
+    return av_q2d([self ref_stream]->time_base);
+}
+
 @end
