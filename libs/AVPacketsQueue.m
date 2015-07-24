@@ -107,7 +107,7 @@ ERROR:
     return YES;
 }
 
-- (UInt32)totalSize
+- (int64_t)totalSize
 {
     return m_queueSize;
 }

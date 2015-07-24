@@ -11,7 +11,7 @@
 
 @interface DEF_CLASS(AVPacketsQueue) : NSObject
 
-- (UInt32)totalSize;        // sum
+- (int64_t)totalSize;       // sum
 - (UInt32)length;           // how many
 
 - (BOOL)appendPacket:(AVPacket*)pkt;
