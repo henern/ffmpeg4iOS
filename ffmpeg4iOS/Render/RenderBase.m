@@ -153,7 +153,6 @@ ERROR:
     return ret;
 }
 
-#define MS_PER_SEC      (1000000)
 - (BOOL)__schedule_drawFrame:(AVFrame*)avf enc:(AVCodecContext*)enc
 {
     BOOL ret = YES;

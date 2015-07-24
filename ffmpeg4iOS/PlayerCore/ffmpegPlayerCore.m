@@ -74,6 +74,7 @@
     self.m_ffmpegQueue = [[NSThread alloc] initWithTarget:self
                                                  selector:@selector(__ffmpeg_packet_thread:)
                                                    object:self.m_path4video];
+    self.m_ffmpegQueue.name = [NSString stringWithFormat:@"ffmpeg4iOS.%@.Q.packet", [self class]];
     [self.m_ffmpegQueue start];
 }
 
@@ -200,7 +201,11 @@
             m_pendingSeekTo = 0.f;
         }
         
+        // recv the packet from ffmpeg
         [self __sync_readPacket4context:avfContext render:render_engine audio:audio_engine];
+        
+        // enable the clock
+        [syncCore start];
     }
     
 ERROR:
@@ -245,6 +250,8 @@ DONE:
                            render:(REF_CLASS(RenderBase))render_egine
                             audio:(REF_CLASS(AudioEngine))audio_engine
 {
+    VBR([NSThread currentThread] == self.m_ffmpegQueue);
+    
     BOOL ret = YES;
     AVPacket packet = {0};
     int err = ERR_SUCCESS;

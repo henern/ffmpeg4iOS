@@ -9,6 +9,8 @@
 #ifndef ffmpeg4iOS_LibCommon_h
 #define ffmpeg4iOS_LibCommon_h
 
+#define MS_PER_SEC      (1000000)
+
 // class
 #define DEF_COMBINE(name, prefix)   prefix##name
 #define DEF_CLASS(name)         DEF_COMBINE(name, WW /* prefix */)
