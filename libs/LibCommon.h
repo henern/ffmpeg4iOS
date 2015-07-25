@@ -9,6 +9,8 @@
 #ifndef ffmpeg4iOS_LibCommon_h
 #define ffmpeg4iOS_LibCommon_h
 
+#define FFMPEG4IOS_VER  (@"0.1.0.0")
+
 #define MS_PER_SEC      (1000000)
 
 // class
