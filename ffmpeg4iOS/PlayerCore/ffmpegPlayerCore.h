@@ -18,5 +18,7 @@
 - (void)play;
 - (void)pause;
 - (void)seekTo:(double)pos;
+- (double)duration;
+- (double)position;
 
 @end

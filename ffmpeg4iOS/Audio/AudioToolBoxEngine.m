@@ -24,6 +24,9 @@ void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueu
     BOOL m_reprimeQueue;
 }
 
+@property (atomic, assign) BOOL stoppingQueue;
+@property (atomic, assign) int64_t pts_sample_start;
+
 @end
 
 @implementation DEF_CLASS(AudioToolBoxEngine)
@@ -62,9 +65,17 @@ ERROR:
     AudioTimeStamp tmstmp = {0};
     AudioQueueGetCurrentTime(m_audioQueue, NULL, &tmstmp, NULL);
     
+    // sample_start is non-0 if seek
+    int64_t sample_start = 0;
+    if (self.pts_sample_start != AV_NOPTS_VALUE)
+    {
+        sample_start = self.pts_sample_start;
+    }
+    
     if ((tmstmp.mFlags & kAudioTimeStampSampleTimeValid) != 0)
     {
         // mSampleTime == how many samples have been played.
+        tmstmp.mSampleTime += sample_start;
         return tmstmp.mSampleTime / [self ctx_codec]->sample_rate;
     }
     
@@ -172,6 +183,12 @@ ERROR:
     
     while (buffer->mPacketDescriptionCount < buffer->mPacketDescriptionCapacity)
     {
+        // AudioQueueStop is ongoing, any pending packets should be discarded.
+        if (self.stoppingQueue)
+        {
+            FINISH();
+        }
+        
         AVPacket *top = [self topPacket];
         if (!top && buffer->mPacketDescriptionCount == 0)
         {
@@ -217,6 +234,19 @@ ERROR:
         break;
     }
     
+    // NOTE: keep the first pts of playback, it's not 0 if seek.
+    //       check -[self timestamp] for more details.
+    if (self.pts_sample_start == AV_NOPTS_VALUE)
+    {
+        self.pts_sample_start = bufStartTime.mSampleTime;
+    }
+    
+    VBR(self.pts_sample_start != AV_NOPTS_VALUE);
+    if (self.pts_sample_start != AV_NOPTS_VALUE)
+    {
+        bufStartTime.mSampleTime -= self.pts_sample_start;
+    }
+    
     CBRA(buffer->mPacketDescriptionCount > 0);
     
     FFMLOG_OC(@"enqueue a buffer with #%d packets, at %lf", buffer->mPacketDescriptionCount, bufStartTime.mSampleTime);
@@ -231,6 +261,7 @@ ERROR:
     CBRA(err == ERR_SUCCESS);
     
 ERROR:
+DONE:
     return ret;
 }
 
@@ -297,9 +328,15 @@ ERROR:
 
 - (BOOL)reset
 {
+    [super reset];
+    
     if (m_audioQueue)
     {
+        // AudioQueueStop will invoke callbacks for all pending buffers synchronously.
+        // so we need a flag here to discard all pending packets.
+        self.stoppingQueue = YES;
         AudioQueueStop(m_audioQueue, YES);
+        self.stoppingQueue = NO;
     }
     
     for (int i = 0; i < AUDIO_BUFFER_QUANTITY; i++)
@@ -307,8 +344,9 @@ ERROR:
         m_flagBufferInQueue[i] = NO;
     }
     m_reprimeQueue = YES;
+    self.pts_sample_start = AV_NOPTS_VALUE;
     
-    return [super reset];
+    return YES;
 }
 
 @end

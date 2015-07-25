@@ -19,5 +19,6 @@
 - (AVPacket*)topPacket;
 
 - (BOOL)reset;
+- (BOOL)cleanup;
 
 @end

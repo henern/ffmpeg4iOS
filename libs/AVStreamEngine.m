@@ -28,9 +28,14 @@
     return self;
 }
 
+- (void)dealloc
+{
+    [self cleanup];
+}
+
 - (void)cleanup
 {
-    [self reset];
+    [self.pkt_queue cleanup];
     
     AVCodecContext *ctx = m_ctx_codec;
     m_ctx_codec = NULL;
@@ -47,6 +52,7 @@
 - (BOOL)reset
 {
     [self.pkt_queue reset];
+    avcodec_flush_buffers([self ctx_codec]);
     
     return YES;
 }

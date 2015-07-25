@@ -56,11 +56,8 @@
     self.aspectRatio = ratio;
     
     // spawn render thread
-    m_render_thread = [[NSThread alloc] initWithTarget:self
-                                              selector:@selector(__ffmpeg_rendering_thread:)
-                                                object:nil];
-    m_render_thread.name = [NSString stringWithFormat:@"ffmpeg4iOS.%@.Q.rendering", [self class]];
-    [m_render_thread start];
+    ret = [self __setupRendering];
+    CBRA(ret);
     
 ERROR:    
     if (!ret)
@@ -85,15 +82,25 @@ ERROR:
 
 - (void)cleanup
 {
-    m_last_pts = 0.f;
-    
-    [m_render_thread cancel];
-    m_render_thread = nil;
+    [self __destroyRenderingThread];
     
     [super cleanup];
     
     self.ref_codec = NULL;
     self.aspectRatio = 0.f;
+}
+
+- (BOOL)reset
+{
+    [super reset];
+    
+    if (![self __setupRendering])
+    {
+        VERROR();
+        return NO;
+    }
+    
+    return YES;
 }
 
 #pragma mark private
@@ -112,8 +119,6 @@ ERROR:
 
 - (BOOL)__recvPacket:(NSMutableData *)pkt_data
 {
-    VBR([NSThread currentThread] == m_render_thread);
-    
     BOOL ret = YES;
     int err = ERR_SUCCESS;
     AVPacket *pkt = (AVPacket*)[pkt_data mutableBytes];
@@ -122,6 +127,7 @@ ERROR:
     AVFrame *avfDecoded = av_frame_alloc();
     AVCodecContext *enc = [self ctx_codec];
     
+    CBR([NSThread currentThread] == m_render_thread);   // discard if reset
     CPR(enc);
     CBRA(pkt_data.length == sizeof(AVPacket));
     
@@ -176,6 +182,12 @@ ERROR:
     // convert pts in second unit
     pts *= [self time_base];
     
+    // first frame?
+    if (m_last_pts == AV_NOPTS_VALUE)
+    {
+        m_last_pts = pts;
+    }
+    
     // delay since previous frame
     double delay = pts - m_last_pts;
     if (delay > 0.f)
@@ -208,6 +220,45 @@ ERROR:
     }
     
     return ret;
+}
+
+- (BOOL)__setupRendering
+{
+    [self __destroyRenderingThread];
+    
+    // spawn render thread
+    m_render_thread = [[NSThread alloc] initWithTarget:self
+                                              selector:@selector(__ffmpeg_rendering_thread:)
+                                                object:nil];
+    m_render_thread.name = [NSString stringWithFormat:@"ffmpeg4iOS.%@.Q.rendering", [self class]];
+    [m_render_thread start];
+    
+    return [m_render_thread isExecuting];
+}
+
+- (void)__force_thread_quit
+{
+    VBR([NSThread currentThread] != m_render_thread);
+    [NSThread exit];
+}
+
+- (void)__destroyRenderingThread
+{
+    NSThread *prev_thread = m_render_thread;
+    m_render_thread = NULL;
+    m_last_pts = AV_NOPTS_VALUE;
+    
+    // shut the old thread
+    if (prev_thread)
+    {
+        [self performSelector:@selector(__force_thread_quit)
+                     onThread:prev_thread
+                   withObject:nil
+                waitUntilDone:NO];
+        [prev_thread cancel];
+    }
+    
+    prev_thread = nil;
 }
 
 @end

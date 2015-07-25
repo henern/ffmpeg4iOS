@@ -14,6 +14,7 @@
 @interface DEF_CLASS(AVPacketsQueue) ()
 {
     int64_t m_queueSize;
+    // FIXME: i don't think array is good choice here
     NSMutableArray *m_queue;
 }
 
@@ -79,13 +80,17 @@ ERROR:
     
     @synchronized(self)
     {
+        AVPacket *pkt = NULL;
         iter = [m_queue firstObject];
         CPRA(iter);
         CBRA(iter.length == sizeof(*destPkt));
         
-        m_queueSize -= iter.length;
+        pkt = (AVPacket*)[iter bytes];
+        CPRA(pkt);
+        
+        m_queueSize -= pkt->size;
         [m_queue removeObject:iter];
-        CBRA(m_queueSize > 0);
+        CBRA(m_queueSize >= 0);
     }
     
     memcpy(destPkt, [iter bytes], sizeof(*destPkt));
@@ -94,15 +99,23 @@ ERROR:
     return ret;
 }
 
+- (BOOL)cleanup
+{
+    return [self reset];
+}
+
 - (BOOL)reset
 {
-    for (NSMutableData *pktData in m_queue)
+    @synchronized(self)
     {
-        av_free_packet([pktData mutableBytes]);
+        for (NSMutableData *pktData in m_queue)
+        {
+            av_free_packet([pktData mutableBytes]);
+        }
+        
+        [m_queue removeAllObjects];
+        m_queueSize = 0;
     }
-    
-    [m_queue removeAllObjects];
-    m_queueSize = 0;
     
     return YES;
 }

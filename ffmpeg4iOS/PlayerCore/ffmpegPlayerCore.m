@@ -28,6 +28,9 @@
 @property (nonatomic, copy) NSString *m_path4video;
 @property (nonatomic, strong) NSError *m_err;
 
+@property (atomic, assign) double duration;
+@property (atomic, assign) double position;
+
 @end
 
 @implementation DEF_CLASS(ffmpegPlayerCore)
@@ -108,7 +111,11 @@
 
 - (void)seekTo:(double)pos
 {
+    VMAINTHREAD();
     
+    FFMLOG_OC(@"try to seek to %lf", pos);
+    m_pendingSeekTo = pos;
+    m_shouldSeek = YES;
 }
 
 #pragma mark loop
@@ -153,6 +160,12 @@
     CBRA(err >= ERR_SUCCESS);
     FFMLOG(@"Found stream info");
     
+    // duration
+    CBRA(avfContext->duration > 0);
+    self.duration = avfContext->duration * 1.0f / AV_TIME_BASE;
+    self.position = 0.f;
+    FFMLOG_OC(@"[%@] duration is %lf", path, self.duration);
+    
     // go through each streams
     for(int i = 0; i < avfContext->nb_streams; i++)
     {
@@ -182,7 +195,7 @@
     {
         if (m_shouldSeek)
         {
-            err = av_seek_frame(avfContext, DEFAULT_STREAM, m_pendingSeekTo * avfContext->duration, 0);
+            err = av_seek_frame(avfContext, DEFAULT_STREAM, m_pendingSeekTo * AV_TIME_BASE, 0);
             if (err < ERR_SUCCESS)
             {
                 // just ignore
@@ -206,6 +219,9 @@
         
         // enable the clock
         [syncCore start];
+        
+        // FIXME: need to figure out where is good to update the position
+        self.position = [syncCore timestamp];
     }
     
 ERROR:
