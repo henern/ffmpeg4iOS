@@ -10,8 +10,9 @@
 #import "AVPacketsQueue.h"
 #import "libavformat/avformat.h"
 #import "SyncCore.h"
+#import "ThreadSafeDebug.h"
 
-@interface DEF_CLASS(AVStreamEngine) : NSObject
+@interface DEF_CLASS(AVStreamEngine) : THREADSAFE_DEBUG_CLASS
 
 @property (nonatomic, assign) AVStream *ref_stream;
 @property (nonatomic, assign) int index_stream;

@@ -21,13 +21,13 @@
 
 - (BOOL)drawFrame:(AVFrame *)avfDecoded enc:(AVCodecContext*)enc
 {
-    VBR(0);
-    return NO;
+    return YES;
 }
 
 - (BOOL)attachToView:(UIView *)view
 {
-    view.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
+    VHOSTTHREAD();
+    
     self.ref_drawingView = view;
     
     return ([self.ref_drawingView isKindOfClass:[UIView class]]);
@@ -70,6 +70,8 @@ ERROR:
 
 - (BOOL)appendPacket:(AVPacket *)pkt
 {
+    VHOSTTHREAD();
+    
     NSMutableData *pkt_data = [NSMutableData dataWithBytes:(const void *)pkt
                                                     length:sizeof(*pkt)];
     [self performSelector:@selector(__recvPacket:)
@@ -224,6 +226,8 @@ ERROR:
 
 - (BOOL)__setupRendering
 {
+    VHOSTTHREAD();
+    
     [self __destroyRenderingThread];
     
     // spawn render thread
@@ -244,6 +248,8 @@ ERROR:
 
 - (void)__destroyRenderingThread
 {
+    VHOSTTHREAD();
+    
     NSThread *prev_thread = m_render_thread;
     m_render_thread = NULL;
     m_last_pts = AV_NOPTS_VALUE;

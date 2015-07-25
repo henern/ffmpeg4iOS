@@ -86,6 +86,8 @@ ERROR:
 #define UNKNOWN_CODEC_ID        (-1)
 - (BOOL)__setup2stream:(AVStream*)stream err:(int *)errCode
 {
+    VHOSTTHREAD();
+    
     BOOL ret = YES;
     
     int err = ERR_SUCCESS;
@@ -167,7 +169,6 @@ ERROR:
         *errCode = err;
     }
     
-    ret = YES;  // it's NOT ciritcal if error in audio
     return ret;
 }
 
@@ -249,7 +250,6 @@ ERROR:
     
     CBRA(buffer->mPacketDescriptionCount > 0);
     
-    FFMLOG_OC(@"enqueue a buffer with #%d packets, at %lf", buffer->mPacketDescriptionCount, bufStartTime.mSampleTime);
     err = AudioQueueEnqueueBufferWithParameters(m_audioQueue,
                                                 buffer,
                                                 0,
@@ -258,15 +258,23 @@ ERROR:
                                                 NULL,
                                                 &bufStartTime,
                                                 NULL);
-    CBRA(err == ERR_SUCCESS);
+    CBR(err == ERR_SUCCESS);
     
 ERROR:
 DONE:
+    FFMLOG_OC(@"%@(%ld) to enqueue a buffer with #%d packets, at %lf",
+              ret? @"SUCCEED" : @"FAILED",
+              err,
+              buffer->mPacketDescriptionCount,
+              bufStartTime.mSampleTime);
+    
     return ret;
 }
 
 - (BOOL)__try2refillBuffers
 {
+    VHOSTTHREAD();
+    
     BOOL ret = YES;
     int err = ERR_SUCCESS;
     

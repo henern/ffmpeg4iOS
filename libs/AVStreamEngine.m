@@ -35,6 +35,8 @@
 
 - (void)cleanup
 {
+    VHOSTTHREAD();
+    
     [self.pkt_queue cleanup];
     
     AVCodecContext *ctx = m_ctx_codec;
@@ -51,6 +53,8 @@
 
 - (BOOL)reset
 {
+    VHOSTTHREAD();
+    
     [self.pkt_queue reset];
     avcodec_flush_buffers([self ctx_codec]);
     
@@ -59,6 +63,8 @@
 
 - (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index
 {
+    VHOSTTHREAD();
+    
     BOOL ret = YES;
     int err = ERR_SUCCESS;
     AVCodecContext *enc = NULL;
@@ -126,6 +132,8 @@ ERROR:
 
 - (BOOL)appendPacket:(AVPacket *)pkt
 {
+    VHOSTTHREAD();
+    
     return [self.pkt_queue appendPacket:pkt];
 }
 

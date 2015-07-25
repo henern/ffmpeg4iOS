@@ -50,6 +50,9 @@
     CPR(enc);
     CBRA(m_bufferYUV.length >= [self __size_per_picture_YUV420P]);
     
+    ret = [super drawFrame:avfDecoded enc:enc];
+    CBRA(ret);
+    
     // binding
     err = avpicture_fill((AVPicture*)avpicYUV, [m_bufferYUV mutableBytes], enc->pix_fmt, enc->width, enc->height);
     CBRA(err >= 0);
@@ -174,6 +177,8 @@ ERROR:
 
 - (BOOL)__setupBuffers4context:(EAGLContext*)ctx layer:(CAEAGLLayer*)eaglLayer view:(UIView*)drawingView
 {
+    VHOSTTHREAD();
+    
     glGenRenderbuffers(1, &m_depthRenderBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, m_depthRenderBuffer);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, drawingView.frame.size.width, drawingView.frame.size.height);
@@ -196,6 +201,7 @@ ERROR:
 
 - (BOOL)__setupVBOs
 {
+    VHOSTTHREAD();
     
     glGenBuffers(1, &m_vertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
