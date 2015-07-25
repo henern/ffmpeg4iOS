@@ -28,4 +28,8 @@
 // weak
 #define DEF_WEAK_SELF()         __weak typeof(self) weak_self = self
 
+// condition
+#define WAIT_CONDITION(c)       [(c) lock];[(c) wait];[(c) unlock]
+#define SIGNAL_CONDITION(c)     [(c) lock];[(c) signal];[(c) unlock]
+
 #endif

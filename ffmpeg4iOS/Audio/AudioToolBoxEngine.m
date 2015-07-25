@@ -365,6 +365,5 @@ void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueu
     VBR([engine isKindOfClass:[DEF_CLASS(AudioToolBoxEngine) class]]);
     
     BOOL ret = [engine __fillBuffer:buffer];
-    VBR(ret);
     UNUSE(ret);
 }

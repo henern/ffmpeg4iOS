@@ -17,5 +17,8 @@
 
 - (BOOL)attachToView:(UIView*)view;
 - (BOOL)drawFrame:(AVFrame *)avfDecoded enc:(AVCodecContext*)enc;
+- (BOOL)isInRenderThread;
 
 @end
+
+#define VRENDERTHREAD()         VBR([self isInRenderThread])

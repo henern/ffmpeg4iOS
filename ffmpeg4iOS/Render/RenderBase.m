@@ -13,6 +13,9 @@
 {
     NSThread *m_render_thread;
     double m_last_pts;
+    
+    NSCondition *m_signal_packet_available;
+    NSCondition *m_signal_thread_quit;
 }
 
 @end
@@ -21,7 +24,13 @@
 
 - (BOOL)drawFrame:(AVFrame *)avfDecoded enc:(AVCodecContext*)enc
 {
+    VRENDERTHREAD();
     return YES;
+}
+
+- (BOOL)isInRenderThread
+{
+    return [NSThread currentThread] == m_render_thread;
 }
 
 - (BOOL)attachToView:(UIView *)view
@@ -72,14 +81,15 @@ ERROR:
 {
     VHOSTTHREAD();
     
-    NSMutableData *pkt_data = [NSMutableData dataWithBytes:(const void *)pkt
-                                                    length:sizeof(*pkt)];
-    [self performSelector:@selector(__recvPacket:)
-                 onThread:m_render_thread
-               withObject:pkt_data
-            waitUntilDone:NO];
+    BOOL ret = [super appendPacket:pkt];
+    CBRA(ret);
     
-    return YES;
+    // wake up __ffmpeg_rendering_thread
+    VPR(m_signal_packet_available);
+    SIGNAL_CONDITION(m_signal_packet_available);
+    
+ERROR:
+    return ret;
 }
 
 - (void)cleanup
@@ -108,30 +118,92 @@ ERROR:
 #pragma mark private
 - (void)__ffmpeg_rendering_thread:(id)param
 {
-    NSRunLoop *loop = [NSRunLoop currentRunLoop];
-    
     // priority
     [NSThread setThreadPriority:1];
     
+    VPR(m_signal_packet_available);
+    VPR(m_signal_thread_quit);
+    
     while (1)
     {
-        [loop run];
+        WAIT_CONDITION(m_signal_packet_available);
+        
+        // one or more packets are available
+        BOOL shouldQuit = NO;
+        BOOL ret = [self __handlePacketsIfQuit:&shouldQuit];
+        VBR(ret);
+        UNUSE(ret);
+        
+        if (shouldQuit)
+        {
+            break;
+        }
     }
+    
+    // -[self __destroyRenderingThread] is wait for this
+    SIGNAL_CONDITION(m_signal_thread_quit);
+    
+    FFMLOG(@"%@ quits", [NSThread currentThread].name);
 }
 
-- (BOOL)__recvPacket:(NSMutableData *)pkt_data
+- (BOOL)__handlePacketsIfQuit:(BOOL*)ifQuit
 {
+    VRENDERTHREAD();
+    
+    BOOL ret = YES;
+    
+    CPRA(ifQuit);
+    *ifQuit = NO;
+    
+    while (1)
+    {
+        AVPacket pkt = {0};
+        AVPacket *top = [self topPacket];
+        
+        // try to check the top
+        if (!top)
+        {
+            break;
+        }
+        
+        // consume one
+        ret = [self popPacket:&pkt];
+        CCBRA(ret);
+        
+        // if quit, discard all pending
+        if ([self __isQuitPacket:&pkt])
+        {
+            *ifQuit = YES;
+            FINISH();
+        }
+        
+        ret = [self __recvPacket:&pkt];
+    DONE:
+        if (pkt.data)
+        {
+            av_free_packet(&pkt);
+        }
+        CCBRA(ret);
+    }
+
+ERROR:
+    return ret;
+}
+
+- (BOOL)__recvPacket:(AVPacket *)pkt
+{
+    VRENDERTHREAD();
+    
     BOOL ret = YES;
     int err = ERR_SUCCESS;
-    AVPacket *pkt = (AVPacket*)[pkt_data mutableBytes];
     
     int finished = 0;
     AVFrame *avfDecoded = av_frame_alloc();
     AVCodecContext *enc = [self ctx_codec];
     
+    CPRA(pkt);
     CBR([NSThread currentThread] == m_render_thread);   // discard if reset
     CPR(enc);
-    CBRA(pkt_data.length == sizeof(AVPacket));
     
     err = avcodec_decode_video2(enc, avfDecoded, &finished, pkt);
     CBRA(err >= 0);
@@ -151,18 +223,14 @@ ERROR:
         av_frame_free(&avfDecoded);
         avfDecoded = NULL;
     }
-    
-    if (pkt)
-    {
-        av_free_packet(pkt);
-        pkt = NULL;
-    }
         
     return ret;
 }
 
 - (BOOL)__schedule_drawFrame:(AVFrame*)avf enc:(AVCodecContext*)enc
 {
+    VRENDERTHREAD();
+    
     BOOL ret = YES;
     double pts = AV_NOPTS_VALUE;
     
@@ -230,6 +298,11 @@ ERROR:
     
     [self __destroyRenderingThread];
     
+    m_signal_packet_available = [[NSCondition alloc] init];
+    VPR(m_signal_packet_available);
+    m_signal_thread_quit = [[NSCondition alloc] init];
+    VPR(m_signal_thread_quit);
+    
     // spawn render thread
     m_render_thread = [[NSThread alloc] initWithTarget:self
                                               selector:@selector(__ffmpeg_rendering_thread:)
@@ -240,31 +313,44 @@ ERROR:
     return [m_render_thread isExecuting];
 }
 
-- (void)__force_thread_quit
-{
-    VBR([NSThread currentThread] != m_render_thread);
-    [NSThread exit];
-}
-
 - (void)__destroyRenderingThread
 {
     VHOSTTHREAD();
     
-    NSThread *prev_thread = m_render_thread;
-    m_render_thread = NULL;
-    m_last_pts = AV_NOPTS_VALUE;
-    
-    // shut the old thread
-    if (prev_thread)
+    if (m_render_thread)
     {
-        [self performSelector:@selector(__force_thread_quit)
-                     onThread:prev_thread
-                   withObject:nil
-                waitUntilDone:NO];
-        [prev_thread cancel];
+        [self.pkt_queue reset];
+        [self __appendQuitPacket];
+        
+        // block until the thread finished
+        WAIT_CONDITION(m_signal_thread_quit);
     }
     
-    prev_thread = nil;
+    m_signal_thread_quit = nil;
+    m_signal_packet_available = nil;
+    
+    m_render_thread = NULL;
+    m_last_pts = AV_NOPTS_VALUE;
+}
+
+#define AV_PKT_FLAG_QUIT        0x8000
+- (BOOL)__isQuitPacket:(AVPacket*)pkt
+{
+    return ((pkt->flags & AV_PKT_FLAG_QUIT) != 0);
+}
+
+#define AVPACKET_QUIT_DATA      "av_packet_quit"
+- (BOOL)__appendQuitPacket
+{
+    AVPacket pktQuit = {0};
+    av_new_packet(&pktQuit, sizeof(AVPACKET_QUIT_DATA));
+    pktQuit.flags |= AV_PKT_FLAG_QUIT;
+    
+    VBR(pktQuit.size == sizeof(AVPACKET_QUIT_DATA));
+    VPR(pktQuit.data);
+    memcpy(pktQuit.data, AVPACKET_QUIT_DATA, sizeof(AVPACKET_QUIT_DATA));
+    
+    return [self appendPacket:&pktQuit];
 }
 
 @end

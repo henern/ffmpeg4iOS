@@ -166,6 +166,7 @@ ERROR:
         return delay;
     }
     
+    // FIXME: drop the frame if diff a lot
     double diff = pts - [self.ref_synccore timestamp];
     if (diff < -delay)
     {
