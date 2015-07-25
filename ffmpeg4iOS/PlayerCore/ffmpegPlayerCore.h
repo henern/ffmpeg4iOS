@@ -11,7 +11,7 @@
 
 @interface DEF_CLASS(ffmpegPlayerCore) : UIView
 
-- (instancetype)initWithFrame:(CGRect)frame path:(NSString*)path4video;
+- (instancetype)initWithFrame:(CGRect)frame path:(NSString*)path4video autoPlay:(BOOL)isAutoPlay;
 - (NSString*)path;
 - (NSError*)lastError;
 

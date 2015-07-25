@@ -119,6 +119,22 @@ ERROR:
     return YES;
 }
 
+- (BOOL)doPlay
+{
+    dispatch_async(dispatch_get_current_queue(), ^{
+        
+        // MUST signal the condition async, after status ==> PLAYING 
+        SIGNAL_CONDITION(m_signal_packet_available);
+    });
+    
+    return YES;
+}
+
+- (BOOL)doPause
+{
+    return YES;
+}
+
 #pragma mark private
 - (void)__ffmpeg_rendering_thread:(id)param
 {
@@ -313,6 +329,9 @@ ERROR:
                                                 object:nil];
     m_render_thread.name = [NSString stringWithFormat:@"ffmpeg4iOS.%@.Q.rendering", [self class]];
     [m_render_thread start];
+    
+    // now ready
+    AVSE_STATUS_UNSET(AVSTREAM_ENGINE_STATUS_PREPARE);
     
     return [m_render_thread isExecuting];
 }

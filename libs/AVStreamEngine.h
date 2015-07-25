@@ -12,6 +12,24 @@
 #import "SyncCore.h"
 #import "ThreadSafeDebug.h"
 
+typedef enum
+{
+    AVSTREAM_ENGINE_STATUS_INIT         = 0x0000,
+    AVSTREAM_ENGINE_STATUS_PREPARE      = 0x0001,
+    AVSTREAM_ENGINE_STATUS_PLAYING      = 0x0002,
+    
+    // more?
+    
+    AVSTREAM_ENGINE_STATUS_ERROR        = 0x0800,
+    
+}AVSTREAM_ENGINE_STATUS;
+
+#define AVSE_STATUS_IS_PREPARE()        (([self status] & AVSTREAM_ENGINE_STATUS_PREPARE) != 0)
+#define AVSE_STATUS_IS_PLAYING()        (([self status] & AVSTREAM_ENGINE_STATUS_PLAYING) != 0)
+
+#define AVSE_STATUS_UNSET(s)            (self.status &= ~(s))
+#define AVSE_STATUS_SET(s)              (self.status |= (s))
+
 @interface DEF_CLASS(AVStreamEngine) : THREADSAFE_DEBUG_CLASS
 
 @property (nonatomic, assign) AVStream *ref_stream;
@@ -20,6 +38,7 @@
 @property (nonatomic, assign, readonly) AVCodecContext *ctx_codec;
 @property (nonatomic, assign) AVCodec *ref_codec;
 @property (nonatomic, weak) id<DEF_CLASS(SyncCore)> ref_synccore;
+@property (nonatomic, assign) AVSTREAM_ENGINE_STATUS status;
 
 - (double)time_base;
 
@@ -37,5 +56,12 @@
 - (double)delay4pts:(double)pts delayInPlan:(double)delay;
 
 - (BOOL)reset;
+- (BOOL)play;
+- (BOOL)pause;
+@end
 
+// subclass MUST implement these
+@interface DEF_CLASS(AVStreamEngine) (Sub)
+- (BOOL)doPlay;
+- (BOOL)doPause;
 @end

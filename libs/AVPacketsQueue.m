@@ -75,14 +75,14 @@ ERROR:
     NSMutableData *iter = nil;
     
     CPRA(destPkt);
-    CBRA(m_queueSize > 0);
+    CBR(m_queueSize > 0);
     CBRA([m_queue count] > 0);
     
     @synchronized(self)
     {
         AVPacket *pkt = NULL;
         iter = [m_queue firstObject];
-        CPRA(iter);
+        CPR(iter);
         CBRA(iter.length == sizeof(*destPkt));
         
         pkt = (AVPacket*)[iter bytes];

@@ -34,6 +34,7 @@
 @property (atomic, assign) double duration;
 @property (atomic, assign) double position;
 @property (atomic, assign) float aspectRatio;   // = width / height
+@property (atomic, assign) BOOL userPause;
 
 @end
 
@@ -48,7 +49,7 @@
     av_register_all();
 }
 
-- (instancetype)initWithFrame:(CGRect)frame path:(NSString *)path4video
+- (instancetype)initWithFrame:(CGRect)frame path:(NSString *)path4video autoPlay:(BOOL)isAutoPlay
 {
     VMAINTHREAD();
     
@@ -57,6 +58,7 @@
     {
         VPR(path4video);
         self.m_path4video = path4video;
+        self.userPause = !isAutoPlay;
         
         m_canvas = [[DEF_CLASS(ffmpegCanvas) alloc] initWithFrame:self.bounds];
         [self addSubview:m_canvas];
@@ -114,12 +116,16 @@
 #pragma mark public.playback
 - (void)play
 {
+    VMAINTHREAD();
     
+    self.userPause = NO;
 }
 
 - (void)pause
 {
+    VMAINTHREAD();
     
+    self.userPause = YES;
 }
 
 - (void)seekTo:(double)pos
@@ -233,6 +239,18 @@
         
         // recv the packet from ffmpeg
         [self __sync_readPacket4context:avfContext render:render_engine audio:audio_engine];
+        
+        // play or pause?
+        if (self.userPause)
+        {
+            [audio_engine pause];
+            [render_engine pause];
+        }
+        else
+        {
+            [audio_engine play];
+            [render_engine play];
+        }
         
         // enable the clock
         [syncCore start];

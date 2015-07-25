@@ -37,6 +37,7 @@
 {
     VHOSTTHREAD();
     
+    self.status = AVSTREAM_ENGINE_STATUS_INIT;
     [self.pkt_queue cleanup];
     
     AVCodecContext *ctx = m_ctx_codec;
@@ -55,10 +56,49 @@
 {
     VHOSTTHREAD();
     
+    self.status = AVSTREAM_ENGINE_STATUS_INIT;
+    AVSE_STATUS_SET(AVSTREAM_ENGINE_STATUS_PREPARE);
+    
     [self.pkt_queue reset];
     avcodec_flush_buffers([self ctx_codec]);
     
     return YES;
+}
+
+- (BOOL)play
+{
+    VHOSTTHREAD();
+    
+    BOOL ret = YES;
+    
+    if (!AVSE_STATUS_IS_PLAYING())
+    {
+        ret = [self doPlay];
+        CBR(ret);
+        
+        AVSE_STATUS_SET(AVSTREAM_ENGINE_STATUS_PLAYING);
+    }
+    
+ERROR:
+    return ret;
+}
+
+- (BOOL)pause
+{
+    VHOSTTHREAD();
+    
+    BOOL ret = YES;
+    
+    if (AVSE_STATUS_IS_PLAYING())
+    {
+        ret = [self doPause];
+        CBRA(ret);
+        
+        AVSE_STATUS_UNSET(AVSTREAM_ENGINE_STATUS_PLAYING);
+    }
+    
+ERROR:
+    return ret;
 }
 
 - (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index
@@ -72,6 +112,9 @@
     AVCodecContext *ctx4codec = NULL;
     
     [self cleanup];
+    
+    // update status
+    AVSE_STATUS_SET(AVSTREAM_ENGINE_STATUS_PREPARE);
     
     // mode for discard
     stream->discard = AVDISCARD_NONE;   // AVDISCARD_DEFAULT
@@ -139,11 +182,23 @@ ERROR:
 
 - (BOOL)popPacket:(AVPacket*)destPkt
 {
+    if (!AVSE_STATUS_IS_PLAYING() &&
+        !AVSE_STATUS_IS_PREPARE())
+    {
+        return NO;
+    }
+    
     return [self.pkt_queue popPacket:destPkt];
 }
 
 - (AVPacket*)topPacket
 {
+    if (!AVSE_STATUS_IS_PLAYING() &&
+        !AVSE_STATUS_IS_PREPARE())
+    {
+        return NULL;
+    }
+    
     return [self.pkt_queue topPacket];
 }
 

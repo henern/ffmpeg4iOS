@@ -20,8 +20,6 @@ void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueu
     AudioQueueRef m_audioQueue;
     AudioQueueBufferRef m_audioBuffers[AUDIO_BUFFER_QUANTITY];
     BOOL m_flagBufferInQueue[AUDIO_BUFFER_QUANTITY];
-    
-    BOOL m_reprimeQueue;
 }
 
 @property (atomic, assign) BOOL stoppingQueue;
@@ -205,7 +203,7 @@ ERROR:
             
             AVPacket pkt = {0};
             ret = [self popPacket:&pkt];
-            CBRA(ret);
+            CBR(ret);
             
             // append one packet-description
             indx_pkt_in_buf = buffer->mPacketDescriptionCount;
@@ -245,6 +243,8 @@ ERROR:
     VBR(self.pts_sample_start != AV_NOPTS_VALUE);
     if (self.pts_sample_start != AV_NOPTS_VALUE)
     {
+        // if seek, this step can fix the time,
+        // so that AudioQ will play the buffer immediately.
         bufStartTime.mSampleTime -= self.pts_sample_start;
     }
     
@@ -278,7 +278,7 @@ DONE:
     BOOL ret = YES;
     int err = ERR_SUCCESS;
     
-    if (!m_reprimeQueue)
+    if (!AVSE_STATUS_IS_PREPARE())
     {
         return YES;
     }
@@ -302,11 +302,7 @@ DONE:
     
     err = AudioQueuePrime(m_audioQueue, 0, NULL);
     CBRA(err == ERR_SUCCESS);
-    m_reprimeQueue = NO;
-    
-    // FIXME: start immediately?
-    err = AudioQueueStart(m_audioQueue, NULL);
-    CBRA(err == ERR_SUCCESS);
+    AVSE_STATUS_UNSET(AVSTREAM_ENGINE_STATUS_PREPARE);
     
 ERROR:
     return YES;
@@ -336,6 +332,7 @@ ERROR:
 
 - (BOOL)reset
 {
+    // status ==> PREPARE
     [super reset];
     
     if (m_audioQueue)
@@ -351,10 +348,38 @@ ERROR:
     {
         m_flagBufferInQueue[i] = NO;
     }
-    m_reprimeQueue = YES;
     self.pts_sample_start = AV_NOPTS_VALUE;
     
     return YES;
+}
+
+- (BOOL)doPlay
+{
+    BOOL ret = YES;
+    int err = ERR_SUCCESS;
+    
+    CBR(!AVSE_STATUS_IS_PREPARE());
+    CBRA(!AVSE_STATUS_IS_PLAYING());
+    
+    err = AudioQueueStart(m_audioQueue, NULL);
+    CBRA(err == ERR_SUCCESS);
+    
+ERROR:
+    return ret;
+}
+
+- (BOOL)doPause
+{
+    BOOL ret = YES;
+    int err = ERR_SUCCESS;
+    
+    CBRA(AVSE_STATUS_IS_PLAYING());
+    
+    err = AudioQueuePause(m_audioQueue);
+    CBRA(err == ERR_SUCCESS);
+    
+ERROR:
+    return ret;
 }
 
 @end
