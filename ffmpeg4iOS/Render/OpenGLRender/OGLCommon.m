@@ -11,10 +11,10 @@
 #define TEX_COORD_MAX   1
 const Vertex Vertices[4] = {
     // Front
-    {{1, -1, 0},    {1, 0, 0, 1}, {TEX_COORD_MAX, 0}},
-    {{1, 1, 0},     {0, 1, 0, 1}, {0, 0}},
-    {{-1, 1, 0},    {0, 0, 1, 1}, {0, TEX_COORD_MAX}},
-    {{-1, -1, 0},   {0, 0, 0, 1}, {TEX_COORD_MAX, TEX_COORD_MAX}},
+    {{1, -1, 0},    {1, 0, 0, 1}, {TEX_COORD_MAX, TEX_COORD_MAX}},
+    {{1, 1, 0},     {0, 1, 0, 1}, {TEX_COORD_MAX, 0}},
+    {{-1, 1, 0},    {0, 0, 1, 1}, {0, 0}},
+    {{-1, -1, 0},   {0, 0, 0, 1}, {0, TEX_COORD_MAX}},
 };
 
 const GLubyte Indices[6] = {

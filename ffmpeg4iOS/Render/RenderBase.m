@@ -61,6 +61,10 @@
         FFMLOG(@"No aspect ratio found, assuming 4:3");
         ratio = 4.0 / 3;
     }
+    else
+    {
+        ratio *= stream->codec->width * 1.f / stream->codec->height;
+    }
     
     self.aspectRatio = ratio;
     

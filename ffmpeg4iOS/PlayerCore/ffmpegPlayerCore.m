@@ -15,6 +15,7 @@
 #import "RenderBase+Factory.h"
 #import "AudioEngine+Factory.h"
 #import "AVClockSync.h"
+#import "ffmpegCanvas.h"
 
 #define DEFAULT_STREAM          (-1)
 
@@ -22,6 +23,8 @@
 {
     BOOL m_shouldSeek;
     float m_pendingSeekTo;
+    
+    REF_CLASS(ffmpegCanvas) m_canvas;
 }
 
 @property (nonatomic, strong) NSThread *m_ffmpegQueue;
@@ -30,15 +33,11 @@
 
 @property (atomic, assign) double duration;
 @property (atomic, assign) double position;
+@property (atomic, assign) float aspectRatio;   // = width / height
 
 @end
 
 @implementation DEF_CLASS(ffmpegPlayerCore)
-
-+ (Class)layerClass
-{
-    return [DEF_CLASS(RenderBase) renderLayerClass];
-}
 
 #pragma mark setup
 + (void)initialize
@@ -51,16 +50,30 @@
 
 - (instancetype)initWithFrame:(CGRect)frame path:(NSString *)path4video
 {
+    VMAINTHREAD();
+    
     self = [super initWithFrame:frame];
     if (self)
     {
         VPR(path4video);
         self.m_path4video = path4video;
         
+        m_canvas = [[DEF_CLASS(ffmpegCanvas) alloc] initWithFrame:self.bounds];
+        [self addSubview:m_canvas];
+        
         [self __setup];
     }
     
     return self;
+}
+
+- (void)layoutSubviews
+{
+    [super layoutSubviews];
+    
+    [m_canvas relayoutWithAspectRatio:self.aspectRatio
+                                width:self.frame.size.width
+                               height:self.frame.size.height];
 }
 
 - (void)dealloc
@@ -140,7 +153,7 @@
     CBRA([path isKindOfClass:[NSString class]]);
     
     // attach to view
-    [render_engine attachToView:self];
+    [render_engine attachToView:m_canvas];
         
     // c point to path
     filename = [path UTF8String];
@@ -189,6 +202,10 @@
         }
     }
     CBRA(ret);
+    
+    // relayout the canvas because of aspect-ratio changed
+    self.aspectRatio = render_engine.aspectRatio;
+    [self __force_relayout];
     
     // loop to consume the packets
     while (1)
@@ -328,6 +345,23 @@ DONE:
     
 ERROR:
     return;
+}
+
+- (void)__force_relayout
+{
+    if ([NSThread isMainThread])
+    {
+        [self setNeedsLayout];
+    }
+    else
+    {
+        VBR([NSThread currentThread] == self.m_ffmpegQueue);
+        
+        dispatch_sync(dispatch_get_main_queue(), ^{
+           
+            [self setNeedsLayout];
+        });
+    }
 }
 
 @end
