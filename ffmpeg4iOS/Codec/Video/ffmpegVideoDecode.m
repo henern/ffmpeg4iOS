@@ -25,7 +25,7 @@
 }
 
 - (int)decodePacket:(AVPacket *)pkt
-          yuvBuffer:(__autoreleasing id<WWYUVBuffer> *)yuvBuffer
+          yuvBuffer:(__autoreleasing id<DEF_CLASS(YUVBuffer)> *)yuvBuffer
               codec:(AVCodecContext *)ctxCodec
            finished:(int *)finished
 {

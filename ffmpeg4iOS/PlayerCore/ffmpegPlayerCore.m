@@ -142,6 +142,8 @@
 {
     BOOL ret = YES;
     
+    @autoreleasepool
+    {
     AVFormatContext *avfContext = NULL;
     int err = ERR_SUCCESS;
     const char *filename = NULL;
@@ -216,6 +218,9 @@
     // loop to consume the packets
     while (1)
     {
+        @autoreleasepool
+        {
+        
         if (m_shouldSeek)
         {
             err = av_seek_frame(avfContext, DEFAULT_STREAM, m_pendingSeekTo * AV_TIME_BASE, 0);
@@ -257,6 +262,8 @@
         
         // FIXME: need to figure out where is good to update the position
         self.position = [syncCore timestamp];
+            
+        }
     }
     
 ERROR:
@@ -270,6 +277,7 @@ DONE:
     {
         avformat_close_input(&avfContext);
         avfContext = NULL;
+    }
     }
     
     return;
@@ -309,6 +317,9 @@ DONE:
     
     while (1)
     {
+        @autoreleasepool
+        {
+        
         err = av_read_frame(avfContext, &packet);
         if (err != ERR_SUCCESS)
         {
@@ -359,6 +370,8 @@ DONE:
         CCBRA(ret);
         
         break;
+            
+        }
     }
     
 ERROR:

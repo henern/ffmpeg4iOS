@@ -41,7 +41,7 @@ void vtb_video_decode_callback(void *decompressionOutputRefCon,
 {
     BOOL ret = YES;
     
-    VTB_DECODE_FRAME_CONTEXT *ctx_frame = (VTB_DECODE_FRAME_CTX*)sourceFrameRefCon;
+    VTB_DECODE_FRAME_CONTEXT *ctx_frame = (VTB_DECODE_FRAME_CONTEXT*)sourceFrameRefCon;
     REF_CLASS(VTBVideoDecode) vtb = (__bridge REF_CLASS(VTBVideoDecode))decompressionOutputRefCon;
     REF_CLASS(VTBYUVBuffer) yuvBuf = nil;
     

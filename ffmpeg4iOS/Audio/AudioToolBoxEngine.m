@@ -386,9 +386,14 @@ ERROR:
 
 void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueueBufferRef buffer)
 {
+    @autoreleasepool
+    {
+    
     REF_CLASS(AudioToolBoxEngine) engine = (__bridge REF_CLASS(AudioToolBoxEngine))info;
     VBR([engine isKindOfClass:[DEF_CLASS(AudioToolBoxEngine) class]]);
     
     BOOL ret = [engine __fillBuffer:buffer];
     UNUSE(ret);
+        
+    }
 }
