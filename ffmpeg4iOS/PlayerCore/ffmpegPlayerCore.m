@@ -237,6 +237,9 @@
             m_pendingSeekTo = 0.f;
         }
         
+        // enable the clock
+        [syncCore start];
+        
         // recv the packet from ffmpeg
         [self __sync_readPacket4context:avfContext render:render_engine audio:audio_engine];
         
@@ -251,9 +254,6 @@
             [audio_engine play];
             [render_engine play];
         }
-        
-        // enable the clock
-        [syncCore start];
         
         // FIXME: need to figure out where is good to update the position
         self.position = [syncCore timestamp];

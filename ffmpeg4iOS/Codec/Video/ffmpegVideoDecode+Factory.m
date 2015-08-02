@@ -9,15 +9,15 @@
 #import "ffmpegVideoDecode+Factory.h"
 #import "ffmpegVideoDecode.h"
 #import <UIKit/UIKit.h>
-#import "Utility.h"
+#import "VTBVideoDecode.h"
 
 @implementation DEF_CLASS(ffmpegVideoDecode) (Factory)
 
 + (REF_CLASS(ffmpegVideoDecode))decoder4codec:(AVCodecContext*)ctxCodec
 {
-    if (IOS8_OR_LATER() && ctxCodec->codec_id == AV_CODEC_ID_H264)
+    if ([DEF_CLASS(VTBVideoDecode) supportCodec:ctxCodec])
     {
-        // FIXME: pick up VTB-decoder
+        return [[DEF_CLASS(VTBVideoDecode) alloc] init];
     }
     
     return [[DEF_CLASS(ffmpegVideoDecode) alloc] init];

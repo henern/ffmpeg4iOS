@@ -155,6 +155,8 @@ ERROR:
     
     while (1)
     {
+        @autoreleasepool
+        {
         WAIT_CONDITION(m_signal_packet_available);
         
         // one or more packets are available
@@ -166,6 +168,7 @@ ERROR:
         if (shouldQuit)
         {
             break;
+        }
         }
     }
     
@@ -186,6 +189,8 @@ ERROR:
     
     while (1)
     {
+        @autoreleasepool
+        {
         AVPacket pkt = {0};
         AVPacket *top = [self topPacket];
         
@@ -213,6 +218,7 @@ ERROR:
             av_free_packet(&pkt);
         }
         CCBRA(ret);
+        }
     }
 
 ERROR:
@@ -226,7 +232,7 @@ ERROR:
     BOOL ret = YES;
     int err = ERR_SUCCESS;
     
-    id<WWYUVBuffer> yuvBuf = nil;
+    id<DEF_CLASS(YUVBuffer)> yuvBuf = nil;
     int finished = 0;
     AVCodecContext *enc = [self ctx_codec];
     
@@ -239,7 +245,7 @@ ERROR:
     CPRA(yuvBuf);
     
     // FIXME: render only supports YUV420P now
-    CBRA([yuvBuf pix_fmt] == PIX_FMT_YUV420P);
+    CBRA([yuvBuf pix_fmt] == AV_PIX_FMT_YUV420P);
     
     if (finished)
     {
