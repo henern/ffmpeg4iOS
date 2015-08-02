@@ -17,7 +17,7 @@ Features
 3. cpu: armv7 + x86_64 + arm64.
 4. video: OpenGLES 2.0
 5. audio: AudioQueue
-6. hardware accelerator: mp3 + aac + ac3, 
+6. hardware accelerator: mp3 + aac + ac3, h264, 
 7. coming (not that soon) ...
 
 Samples
@@ -28,8 +28,7 @@ TODO
 ----
 1. online media
 2. customized user-agent
-3. hardware accelerator: h264
-4. subtitles
+3. subtitles
 
 License
 -------
