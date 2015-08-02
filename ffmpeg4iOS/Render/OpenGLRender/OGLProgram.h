@@ -22,8 +22,13 @@
 @property (nonatomic, assign) GLuint texU;
 @property (nonatomic, assign) GLuint texV;
 
+- (BOOL)activateTexY:(const void *)bytesY
+                   U:(const void *)bytesU
+                   V:(const void *)bytesV
+               width:(GLsizei)width
+              height:(GLsizei)height;
+
 - (id)initWithVertShader:(const char*)vertShdr fragShader:(const char*)fragShdr;
 - (BOOL)activate;
-- (BOOL)activateTexYUV4buffer:(const void *)bytes width:(GLsizei)width height:(GLsizei)height;
 
 @end

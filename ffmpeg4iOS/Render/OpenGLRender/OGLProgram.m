@@ -61,7 +61,11 @@
     return GL_NO_ERROR == glGetError();
 }
 
-- (BOOL)activateTexYUV4buffer:(const void *)bytes width:(GLsizei)width height:(GLsizei)height
+- (BOOL)activateTexY:(const void *)bytesY
+                   U:(const void *)bytesU
+                   V:(const void *)bytesV
+               width:(GLsizei)width
+              height:(GLsizei)height
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, self.texY);
@@ -72,7 +76,7 @@
                  width, height,
                  0,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                 bytes);
+                 bytesY);
     VGLERR();
     
     glActiveTexture(GL_TEXTURE1);
@@ -84,7 +88,7 @@
                  width/2, height/2,
                  0,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                 bytes + height * width);
+                 bytesU);
     VGLERR();
     
     glActiveTexture(GL_TEXTURE2);
@@ -96,7 +100,7 @@
                  width/2, height/2,
                  0,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE,
-                 bytes + height * width * 5 / 4);
+                 bytesV);
     VGLERR();
     
     glActiveTexture(GL_TEXTURE0);

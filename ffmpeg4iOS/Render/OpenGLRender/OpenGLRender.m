@@ -22,9 +22,6 @@
     GLuint m_colorRenderBuffer;
     GLuint m_vertexBuffer;
     GLuint m_indexBuffer;
-    
-    // frame buffer
-    NSMutableData *m_bufferYUV;
 }
 
 @end
@@ -36,36 +33,17 @@
     return [CAEAGLLayer class];
 }
 
-- (BOOL)drawFrame:(AVFrame *)avfDecoded enc:(AVCodecContext*)enc
+- (BOOL)drawYUV:(id<DEF_CLASS(YUVBuffer)>)yuvBuf enc:(AVCodecContext*)enc
 {
     BOOL ret = YES;
-    int err = ERR_SUCCESS;
-    
-    AVFrame *avpicYUV = av_frame_alloc();
-    
-    CPRA(m_bufferYUV);
-    CPR(enc);
-    CBRA(m_bufferYUV.length >= [self __size_per_picture_YUV420P]);
-    
-    ret = [super drawFrame:avfDecoded enc:enc];
+
+    ret = [super drawYUV:yuvBuf enc:enc];
+    CBRA(ret);
+        
+    ret = [self __drawYUV:yuvBuf];
     CBRA(ret);
     
-    // binding
-    err = avpicture_fill((AVPicture*)avpicYUV, [m_bufferYUV mutableBytes], enc->pix_fmt, enc->width, enc->height);
-    CBRA(err >= 0);
-    
-    // copy from planes to plain buffer
-    av_picture_copy((AVPicture*)avpicYUV, (AVPicture *)avfDecoded, enc->pix_fmt, enc->width, enc->height);
-    
-    [self __drawYUV:[m_bufferYUV mutableBytes] width:enc->width height:enc->height];
-    
-ERROR:
-    if (avpicYUV)
-    {
-        av_frame_free(&avpicYUV);
-        avpicYUV = NULL;
-    }
-    
+ERROR:    
     return ret;
 }
 
@@ -113,31 +91,7 @@ ERROR:
     return ret;
 }
 
-- (BOOL)attachTo:(AVStream*)stream err:(int*)errCode atIndex:(int)index
-{
-    BOOL ret = [super attachTo:stream err:errCode atIndex:index];
-    CBRA(ret);
-    
-    ret = [self __setup2stream:stream err:errCode];
-    CBRA(ret);
-    
-ERROR:
-    return ret;
-}
-
 #pragma mark private
-- (BOOL)__setup2stream:(AVStream*)stream err:(int*)errCode
-{
-    BOOL ret = YES;
-    
-    // allocate the YUV buffer
-    m_bufferYUV = [NSMutableData dataWithLength:[self __size_per_picture_YUV420P]];
-    CPR(m_bufferYUV);
-    
-ERROR:
-    return ret;
-}
-
 - (BOOL)__setupBuffers4context:(EAGLContext*)ctx layer:(CAEAGLLayer*)eaglLayer view:(UIView*)drawingView
 {
     VHOSTTHREAD();
@@ -177,7 +131,7 @@ ERROR:
     return OGLRET;
 }
 
-- (BOOL)__drawYUV:(uint8_t *)dataYUV width:(float)width height:(float)height
+- (BOOL)__drawYUV:(id<DEF_CLASS(YUVBuffer)>)yuvBuf
 {
     BOOL ret = YES;
     
@@ -185,9 +139,11 @@ ERROR:
     CBR(ret);
     
     // buffer to texture
-    ret = [m_oglProgram activateTexYUV4buffer:dataYUV
-                                        width:width
-                                       height:height];
+    ret = [m_oglProgram activateTexY:[yuvBuf componentY]
+                                   U:[yuvBuf componentU]
+                                   V:[yuvBuf componentV]
+                               width:[yuvBuf width]
+                              height:[yuvBuf height]];
     CBR(ret);
     
     // draw with tex
@@ -229,18 +185,6 @@ ERROR:
     
 ERROR:
     return ret;
-}
-
-- (int)__size_per_picture_YUV420P
-{
-    AVCodecContext *ctx = [self ctx_codec];
-    if (!ctx)
-    {
-        VBR(0);
-        return 0;
-    }
-    
-    return avpicture_get_size(PIX_FMT_YUV420P, ctx->width, ctx->height);
 }
 
 - (BOOL)__prepareContext4openGL

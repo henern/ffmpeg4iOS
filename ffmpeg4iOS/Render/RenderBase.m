@@ -8,6 +8,7 @@
 
 #import "RenderBase.h"
 #import "ehm.h"
+#import "ffmpegVideoDecode+Factory.h"
 
 @interface DEF_CLASS(RenderBase) ()
 {
@@ -16,13 +17,15 @@
     
     NSCondition *m_signal_packet_available;
     NSCondition *m_signal_thread_quit;
+    
+    REF_CLASS(ffmpegVideoDecode) m_decoder;
 }
 
 @end
 
 @implementation DEF_CLASS(RenderBase)
 
-- (BOOL)drawFrame:(AVFrame *)avfDecoded enc:(AVCodecContext*)enc
+- (BOOL)drawYUV:(id<DEF_CLASS(YUVBuffer)>)yuvBuf enc:(AVCodecContext*)enc
 {
     VRENDERTHREAD();
     return YES;
@@ -68,6 +71,10 @@
     
     self.aspectRatio = ratio;
     
+    // different codec, different decoder
+    m_decoder = [DEF_CLASS(ffmpegVideoDecode) decoder4codec:[self ctx_codec]];
+    CPRA(m_decoder);
+    
     // spawn render thread
     ret = [self __setupRendering];
     CBRA(ret);
@@ -104,6 +111,8 @@ ERROR:
     
     self.ref_codec = NULL;
     self.aspectRatio = 0.f;
+    
+    m_decoder = nil;
 }
 
 - (BOOL)reset
@@ -217,57 +226,48 @@ ERROR:
     BOOL ret = YES;
     int err = ERR_SUCCESS;
     
+    id<WWYUVBuffer> yuvBuf = nil;
     int finished = 0;
-    AVFrame *avfDecoded = av_frame_alloc();
     AVCodecContext *enc = [self ctx_codec];
     
     CPRA(pkt);
     CBR([NSThread currentThread] == m_render_thread);   // discard if reset
     CPR(enc);
     
-    err = avcodec_decode_video2(enc, avfDecoded, &finished, pkt);
-    CBRA(err >= 0);
+    err = [m_decoder decodePacket:pkt yuvBuffer:&yuvBuf codec:enc finished:&finished];
+    CBRA(err == ERR_SUCCESS);
+    CPRA(yuvBuf);
     
     // FIXME: render only supports YUV420P now
-    CBRA(enc->pix_fmt == PIX_FMT_YUV420P);
+    CBRA([yuvBuf pix_fmt] == PIX_FMT_YUV420P);
     
     if (finished)
     {
-        ret = [self __schedule_drawFrame:avfDecoded enc:enc];
+        ret = [self __schedule_drawYUV:yuvBuf enc:enc];
         CBRA(ret);
     }
     
 ERROR:
-    if (avfDecoded)
-    {
-        av_frame_free(&avfDecoded);
-        avfDecoded = NULL;
-    }
-        
     return ret;
 }
 
-- (BOOL)__schedule_drawFrame:(AVFrame*)avf enc:(AVCodecContext*)enc
+- (BOOL)__schedule_drawYUV:(id<DEF_CLASS(YUVBuffer)>)yuvBuf enc:(AVCodecContext*)enc
 {
     VRENDERTHREAD();
     
     BOOL ret = YES;
     double pts = AV_NOPTS_VALUE;
     
-    AVFrame *avfDecoded = av_frame_alloc();
-    CPRA(avfDecoded);
+    CPRA(yuvBuf);
     
-    av_frame_move_ref(avfDecoded, avf);
-    
-    // pts from ffmpeg
-    pts = av_frame_get_best_effort_timestamp(avfDecoded);
+    pts = [yuvBuf pts];
     if (pts == AV_NOPTS_VALUE)
     {
         pts = 0.f;
     }
     
     // FIXME: avfDecoded->repeat_pict ?
-    VBR(avfDecoded->repeat_pict == 0);
+    VBR([yuvBuf repeat_pict] == 0);
     
     // convert pts in second unit
     pts *= [self time_base];
@@ -299,16 +299,10 @@ ERROR:
         usleep(delay * MS_PER_SEC);
     }
     
-    ret = [self drawFrame:avfDecoded enc:enc];
+    ret = [self drawYUV:yuvBuf enc:enc];
     CBRA(ret);
     
 ERROR:
-    if (avfDecoded)
-    {
-        av_frame_free(&avfDecoded);
-        avfDecoded = NULL;
-    }
-    
     return ret;
 }
 

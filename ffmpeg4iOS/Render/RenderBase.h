@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "AVStreamEngine.h"
+#import "YUVBuffer.h"
 
 @interface DEF_CLASS(RenderBase) : DEF_CLASS(AVStreamEngine)
 
@@ -16,8 +17,8 @@
 @property (nonatomic, weak) UIView *ref_drawingView;            // weak ref to UIView
 
 - (BOOL)attachToView:(UIView*)view;
-- (BOOL)drawFrame:(AVFrame *)avfDecoded enc:(AVCodecContext*)enc;
 - (BOOL)isInRenderThread;
+- (BOOL)drawYUV:(id<DEF_CLASS(YUVBuffer)>)yuvBuf enc:(AVCodecContext*)enc;
 
 @end
 
