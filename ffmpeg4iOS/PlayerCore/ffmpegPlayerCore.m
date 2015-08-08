@@ -47,6 +47,9 @@
     
     // register ffmpeg once
     av_register_all();
+    
+    // init network component
+    avformat_network_init();
 }
 
 - (instancetype)initWithFrame:(CGRect)frame path:(NSString *)path4video autoPlay:(BOOL)isAutoPlay

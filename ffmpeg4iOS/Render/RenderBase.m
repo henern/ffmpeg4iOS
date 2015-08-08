@@ -240,6 +240,7 @@ ERROR:
     CBR([NSThread currentThread] == m_render_thread);   // discard if reset
     CPR(enc);
     
+    // perf?
     err = [m_decoder decodePacket:pkt yuvBuffer:&yuvBuf codec:enc finished:&finished];
     CBRA(err == ERR_SUCCESS);
     CPRA(yuvBuf);

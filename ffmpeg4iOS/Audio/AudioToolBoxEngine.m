@@ -9,9 +9,9 @@
 #import "AudioToolBoxEngine.h"
 #import "ehm.h"
 #import <AudioToolbox/AudioToolbox.h>
+#import "AQAudioDecode.h"
 
 #define AUDIO_BUFFER_QUANTITY       3
-#define AUDIO_BUFFER_SECONDS        1
 
 void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueueBufferRef buffer);
 
@@ -20,6 +20,8 @@ void ffmpeg_audioQueueOutputCallback(void *info, AudioQueueRef unused, AudioQueu
     AudioQueueRef m_audioQueue;
     AudioQueueBufferRef m_audioBuffers[AUDIO_BUFFER_QUANTITY];
     BOOL m_flagBufferInQueue[AUDIO_BUFFER_QUANTITY];
+    
+    id<DEF_CLASS(ATBAudioDecode)> m_decoder;
 }
 
 @property (atomic, assign) BOOL stoppingQueue;
@@ -81,7 +83,6 @@ ERROR:
 }
 
 #pragma mark private
-#define UNKNOWN_CODEC_ID        (-1)
 - (BOOL)__setup2stream:(AVStream*)stream err:(int *)errCode
 {
     VHOSTTHREAD();
@@ -98,36 +99,12 @@ ERROR:
     ret = [self reset];
     VBR(ret);
     
-    audioFormat.mFormatID = UNKNOWN_CODEC_ID;
-    audioFormat.mSampleRate = codec->sample_rate;
-    audioFormat.mFormatFlags = 0;
+    VBR(m_decoder == nil);
+    m_decoder = [[DEF_CLASS(AQAudioDecode) alloc] init];
+    CPRA(m_decoder);
     
-    // find the codec
-    switch (codec->codec_id)
-    {
-        case CODEC_ID_MP3:
-            audioFormat.mFormatID = kAudioFormatMPEGLayer3;
-            break;
-        case CODEC_ID_AAC:
-            audioFormat.mFormatID = kAudioFormatMPEG4AAC;
-            audioFormat.mFormatFlags = kMPEG4Object_AAC_Main;
-            break;
-        case CODEC_ID_AC3:
-            audioFormat.mFormatID = kAudioFormatAC3;
-            break;
-        default:
-            // FIXME: oops hw decoder is NOT available.
-            FFMLOG(@"Error: audio format %d is not supported", codec->codec_id);
-            audioFormat.mFormatID = kAudioFormatAC3;
-            break;
-    }
-    CBRA(audioFormat.mFormatID != UNKNOWN_CODEC_ID);
-    
-    audioFormat.mBytesPerPacket = 0;
-    audioFormat.mFramesPerPacket = codec->frame_size;
-    audioFormat.mBytesPerFrame = 0;
-    audioFormat.mChannelsPerFrame = codec->channels;
-    audioFormat.mBitsPerChannel = 0;
+    ret = [m_decoder description:&audioFormat codec:codec forStream:stream];
+    CBRA(ret);
     
     // launch the queue and callback
     err = AudioQueueNewOutput(&audioFormat,
@@ -143,8 +120,14 @@ ERROR:
     // allocate audio buffers
     for (int i = 0; i < AUDIO_BUFFER_QUANTITY; i++)
     {
-        uint32_t bufferByteSize = (int)(codec->bit_rate * AUDIO_BUFFER_SECONDS / 8);
-        uint32_t numberPacket = (int)(codec->sample_rate * AUDIO_BUFFER_SECONDS / codec->frame_size + 1);
+        uint32_t bufferByteSize = 0;
+        uint32_t numberPacket = 0;
+        
+        ret = [m_decoder outputBufferSize:&bufferByteSize
+                           numberPktDescr:&numberPacket
+                                    codec:codec
+                                forStream:stream];
+        CBRA(ret);
         
         FFMLOG(@"%u packet capacity, %d byte capacity", numberPacket, bufferByteSize);
         
@@ -199,29 +182,18 @@ ERROR:
         if (top &&
             buffer->mAudioDataBytesCapacity - buffer->mAudioDataByteSize >= top->size)
         {
-            int indx_pkt_in_buf = 0;
+            BOOL ready = NO;
             
             AVPacket pkt = {0};
             ret = [self popPacket:&pkt];
             CBR(ret);
             
-            // append one packet-description
-            indx_pkt_in_buf = buffer->mPacketDescriptionCount;
-            buffer->mPacketDescriptionCount++;
-            
-            if (indx_pkt_in_buf == 0)
-            {
-                bufStartTime.mSampleTime = pkt.pts;
-                bufStartTime.mFlags = kAudioTimeStampSampleTimeValid;
-            }
-            
-            memcpy((uint8_t *)buffer->mAudioData + buffer->mAudioDataByteSize, pkt.data, pkt.size);
-            buffer->mPacketDescriptions[indx_pkt_in_buf].mStartOffset = buffer->mAudioDataByteSize;
-            buffer->mPacketDescriptions[indx_pkt_in_buf].mDataByteSize = pkt.size;
-            buffer->mPacketDescriptions[indx_pkt_in_buf].mVariableFramesInPacket = [self ctx_codec]->frame_size;
-            
-            // sum
-            buffer->mAudioDataByteSize += pkt.size;
+            ret = [m_decoder decodeAudioPacket:&pkt
+                                     outputBuf:buffer
+                                     timestamp:&bufStartTime
+                                         codec:[self ctx_codec]
+                                         ready:&ready];
+            CBRA(ret);
             
             // free
             av_free_packet(&pkt);
@@ -349,6 +321,9 @@ ERROR:
         m_flagBufferInQueue[i] = NO;
     }
     self.pts_sample_start = AV_NOPTS_VALUE;
+    
+    // reset decoder
+    [m_decoder reset];
     
     return YES;
 }
