@@ -8,8 +8,8 @@
 
 #import "AudioToolBoxEngine.h"
 #import "ehm.h"
+#import "ATBAudioDecodeFactory.h"
 #import <AudioToolbox/AudioToolbox.h>
-#import "AQAudioDecode.h"
 
 #define AUDIO_BUFFER_QUANTITY       3
 
@@ -100,7 +100,7 @@ ERROR:
     VBR(ret);
     
     VBR(m_decoder == nil);
-    m_decoder = [[DEF_CLASS(AQAudioDecode) alloc] init];
+    m_decoder = [DEF_CLASS(ATBAudioDecodeFactory) audioDecoder4codec:codec];
     CPRA(m_decoder);
     
     ret = [m_decoder description:&audioFormat codec:codec forStream:stream];
