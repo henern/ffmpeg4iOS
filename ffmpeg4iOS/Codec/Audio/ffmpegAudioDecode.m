@@ -15,11 +15,11 @@
 @interface DEF_CLASS(ffmpegAudioDecode) ()
 {
     SwrContext *m_pSwrCtx;
-    Float64 m_best_pts;
     
     NSMutableData *m_swrBuf;
     int32_t m_offset_swrBuf;
     int32_t m_len_swrBuf;
+    int64_t m_best_pts_base;
 }
 @end
 
@@ -31,7 +31,6 @@
                   ready:(BOOL*)ready
 {
     BOOL ret = YES;
-    Float64 pts = 0.f;
     int32_t nb_samples = 0;
     int indx_pkt_in_buf = 0;
     
@@ -52,18 +51,16 @@
     CBRA(nb_samples > 0);
     dest_len = nb_samples * (av_get_bytes_per_sample(TARGET_SAMPLE_AUDIO_FMT) * ctx_codec->channels);
     
-    // keep current pts
-    pts = m_best_pts;
-    m_best_pts += nb_samples;
-    
     // append one packet-description
     indx_pkt_in_buf = buffer->mPacketDescriptionCount;
     buffer->mPacketDescriptionCount++;
     
     if (indx_pkt_in_buf == 0)
     {
-        bufStartTime->mSampleTime = pts;
+        bufStartTime->mSampleTime = m_best_pts_base;
         bufStartTime->mFlags = kAudioTimeStampSampleTimeValid;
+        
+        m_best_pts_base += nb_samples;
     }
     
     memcpy((uint8_t *)buffer->mAudioData + buffer->mAudioDataByteSize, cursor, dest_len);
@@ -89,6 +86,7 @@ ERROR:
 - (BOOL)decodeAudioPacket:(AVPacket*)pkt
                 outputBuf:(AudioQueueBufferRef)buffer
                 timestamp:(AudioTimeStamp*)bufStartTime
+                time_base:(double)time_base
                     codec:(AVCodecContext*)codec
                     ready:(BOOL*)ready
 {
@@ -154,6 +152,7 @@ DECODE_PKT:
         // update buffer info
         m_offset_swrBuf = 0;
         m_len_swrBuf = avf_size;
+        m_best_pts_base = av_frame_get_best_effort_timestamp(avfDecoded) * time_base * av_frame_get_sample_rate(avfDecoded);
         
         // flush
         ret = [self flush2outputBuf:buffer
@@ -253,10 +252,10 @@ ERROR:
 
 - (void)reset
 {
-    m_best_pts = 0.f;
     m_swrBuf = nil;
     m_offset_swrBuf = 0;
     m_len_swrBuf = 0;
+    m_best_pts_base = 0;
 }
 
 - (void)cleanup

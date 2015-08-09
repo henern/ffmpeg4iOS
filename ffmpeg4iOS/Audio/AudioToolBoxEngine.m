@@ -202,6 +202,7 @@ ERROR:
             ret = [m_decoder decodeAudioPacket:&pkt
                                      outputBuf:buffer
                                      timestamp:&bufStartTime
+                                     time_base:[self time_base]
                                          codec:[self ctx_codec]
                                          ready:&ready];
             CBRA(ret);
@@ -221,6 +222,8 @@ ERROR:
         break;
     }
     
+    CBR(buffer->mPacketDescriptionCount > 0);
+    
     // NOTE: keep the first pts of playback, it's not 0 if seek.
     //       check -[self timestamp] for more details.
     if (self.pts_sample_start == AV_NOPTS_VALUE)
@@ -234,11 +237,6 @@ ERROR:
         // if seek, this step can fix the time,
         // so that AudioQ will play the buffer immediately.
         bufStartTime.mSampleTime -= self.pts_sample_start;
-    }
-    
-    if (buffer->mPacketDescriptionCount == 0)
-    {
-        FINISH();
     }
     
     err = AudioQueueEnqueueBufferWithParameters(m_audioQueue,
@@ -287,8 +285,13 @@ DONE:
             return NO;
         }
         
-        m_flagBufferInQueue[i] = YES;
-        return [self __fillBuffer:m_audioBuffers[i]];
+        // for some codec, __fillBuffer may fail for 1st packat, it's ignorable.
+        if ([self __fillBuffer:m_audioBuffers[i]])
+        {
+            m_flagBufferInQueue[i] = YES;
+        }
+        
+        return YES;
     }
     
     err = AudioQueuePrime(m_audioQueue, 0, NULL);

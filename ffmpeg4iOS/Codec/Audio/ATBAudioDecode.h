@@ -26,6 +26,7 @@
 - (BOOL)decodeAudioPacket:(AVPacket*)pkt
                 outputBuf:(AudioQueueBufferRef)buffer
                 timestamp:(AudioTimeStamp*)audioTS
+                time_base:(double)time_base
                     codec:(AVCodecContext*)ctx_codec
                     ready:(BOOL*)ready;
 
