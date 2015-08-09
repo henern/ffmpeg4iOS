@@ -9,7 +9,7 @@
 #import "AVPacketsQueue.h"
 #import "ehm.h"
 
-#define QUEUE_CAPACITY      16
+#define QUEUE_CAPACITY      512
 
 @interface DEF_CLASS(AVPacketsQueue) ()
 {

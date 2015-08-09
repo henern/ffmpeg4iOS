@@ -207,6 +207,18 @@ ERROR:
     return m_ctx_codec;
 }
 
+- (BOOL)isFull
+{
+    VHOSTTHREAD();
+    
+    if ([self.pkt_queue length] > [self maxPacketQueued])
+    {
+        return YES;
+    }
+    
+    return NO;
+}
+
 - (double)timestamp
 {
     VNOIMPL();
@@ -239,6 +251,12 @@ ERROR:
 {
     // stream->time_base is good, NOT enc->time_base!
     return av_q2d([self ref_stream]->time_base);
+}
+
+#pragma mark Sub-category
+- (int)maxPacketQueued
+{
+    return 64;
 }
 
 @end

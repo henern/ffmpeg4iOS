@@ -350,6 +350,7 @@ ERROR:
     return YES;
 }
 
+#pragma mark AVStreamEngine-Sub
 - (BOOL)doPlay
 {
     BOOL ret = YES;
@@ -377,6 +378,11 @@ ERROR:
     
 ERROR:
     return ret;
+}
+
+- (int)maxPacketQueued
+{
+    return 512;
 }
 
 @end

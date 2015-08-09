@@ -50,6 +50,8 @@ typedef enum
 - (BOOL)popPacket:(AVPacket*)destPkt;
 - (AVPacket*)topPacket;
 
+// queue is full, please wait for a while before push another packet
+- (BOOL)isFull;
 // current time of this stream
 - (double)timestamp;
 // adjust the delay according to the clock (sync-core)
@@ -64,4 +66,5 @@ typedef enum
 @interface DEF_CLASS(AVStreamEngine) (Sub)
 - (BOOL)doPlay;
 - (BOOL)doPause;
+- (int)maxPacketQueued;
 @end

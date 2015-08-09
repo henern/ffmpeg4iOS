@@ -320,6 +320,15 @@ DONE:
     
     while (1)
     {
+        // if both video and audio is full of packets
+        if ([render_egine isFull] && [audio_engine isFull])
+        {
+            // take a break to reduce CPU usage (130% ==> 40%).
+            // VLC is far more better (19% vs 40%), for the same video sample.
+            usleep(MS_PER_SEC * 0.5);
+            break;
+        }
+        
         @autoreleasepool
         {
         
