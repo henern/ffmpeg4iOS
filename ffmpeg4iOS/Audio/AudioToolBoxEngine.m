@@ -165,10 +165,24 @@ ERROR:
     
     while (buffer->mPacketDescriptionCount < buffer->mPacketDescriptionCapacity)
     {
+        BOOL ready = NO;
+        
         // AudioQueueStop is ongoing, any pending packets should be discarded.
         if (self.stoppingQueue)
         {
             FINISH();
+        }
+        
+        // flush pending buffer if there
+        ret = [m_decoder flush2outputBuf:buffer
+                               timestamp:&bufStartTime
+                                   codec:[self ctx_codec]
+                                   ready:&ready];
+        CBRA(ret);
+        
+        if (ready)
+        {
+            break;
         }
         
         AVPacket *top = [self topPacket];
@@ -179,11 +193,8 @@ ERROR:
             continue;
         }
                 
-        if (top &&
-            buffer->mAudioDataBytesCapacity - buffer->mAudioDataByteSize >= top->size)
+        if (top)
         {
-            BOOL ready = NO;
-            
             AVPacket pkt = {0};
             ret = [self popPacket:&pkt];
             CBR(ret);
@@ -197,6 +208,11 @@ ERROR:
             
             // free
             av_free_packet(&pkt);
+            
+            if (ready)
+            {
+                break;
+            }
             
             // try to fill more
             continue;
@@ -220,7 +236,10 @@ ERROR:
         bufStartTime.mSampleTime -= self.pts_sample_start;
     }
     
-    CBRA(buffer->mPacketDescriptionCount > 0);
+    if (buffer->mPacketDescriptionCount == 0)
+    {
+        FINISH();
+    }
     
     err = AudioQueueEnqueueBufferWithParameters(m_audioQueue,
                                                 buffer,
