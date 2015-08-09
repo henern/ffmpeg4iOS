@@ -57,6 +57,7 @@
     
     if (indx_pkt_in_buf == 0)
     {
+        VBR(m_best_pts_base != AV_NOPTS_VALUE);
         bufStartTime->mSampleTime = m_best_pts_base;
         bufStartTime->mFlags = kAudioTimeStampSampleTimeValid;
         
@@ -152,7 +153,11 @@ DECODE_PKT:
         // update buffer info
         m_offset_swrBuf = 0;
         m_len_swrBuf = avf_size;
+        
+        if (m_best_pts_base == AV_NOPTS_VALUE)
+        {
         m_best_pts_base = av_frame_get_best_effort_timestamp(avfDecoded) * time_base * av_frame_get_sample_rate(avfDecoded);
+        }
         
         // flush
         ret = [self flush2outputBuf:buffer
@@ -255,13 +260,24 @@ ERROR:
     m_swrBuf = nil;
     m_offset_swrBuf = 0;
     m_len_swrBuf = 0;
-    m_best_pts_base = 0;
+    m_best_pts_base = AV_NOPTS_VALUE;
 }
 
 - (void)cleanup
 {
     swr_free(&m_pSwrCtx);
     VBR(NULL == m_pSwrCtx);
+}
+
+- (instancetype)init
+{
+    self = [super init];
+    if (self)
+    {
+        [self reset];
+    }
+    
+    return self;
 }
 
 - (void)dealloc
