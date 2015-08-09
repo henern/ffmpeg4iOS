@@ -40,7 +40,7 @@
     CPRA(finished);
     
     err = avcodec_decode_video2(ctxCodec, avfDecoded, finished, pkt);
-    CBRA(err >= 0);
+    CBR(err >= 0);
     
     // buffer is re-usable
     if (!m_bufYUV)
@@ -59,6 +59,11 @@ ERROR:
     {
         av_frame_free(&avfDecoded);
         avfDecoded = NULL;
+    }
+    
+    if (err < 0)
+    {
+        FFMLOG_OC(@"FAILED to decode a video-packet (error:%d, pts:%ld)", err, pkt->pts);
     }
     
     return err;
