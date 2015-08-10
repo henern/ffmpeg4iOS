@@ -50,7 +50,7 @@
     AVFrame *avpicYUV = av_frame_alloc();
     CPRA(avpicYUV);
     CPRA(avfDecoded);
-    CBRA(fmt == AV_PIX_FMT_YUV420P);
+    CBRA(fmt == AV_PIX_FMT_YUV420P || fmt == AV_PIX_FMT_NV12);
     CBRA(m_width > 0 && m_height > 0);
     
     // buffer is re-usable
@@ -128,6 +128,11 @@ ERROR:
     return ([self componentU] + [self width] * [self height] / 4);
 }
 
+- (const uint8_t*)componentUV
+{
+    return [self componentU];
+}
+
 - (int64_t)pts
 {
     return m_pts;
@@ -156,6 +161,9 @@ ERROR:
 #pragma mark private
 - (int)__size_per_picture_YUV420P
 {
+    VBR(avpicture_get_size(AV_PIX_FMT_NV12, [self width], [self height]) ==
+        avpicture_get_size(AV_PIX_FMT_YUV420P, [self width], [self height]));
+    
     return avpicture_get_size(PIX_FMT_YUV420P, [self width], [self height]);
 }
 

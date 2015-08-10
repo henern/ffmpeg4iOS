@@ -9,7 +9,6 @@
 #import "OpenGLRender.h"
 #import "ehm.h"
 #import "OGLProgram.h"
-#import "Shaders.h"
 
 @interface DEF_CLASS(OpenGLRender) ()
 {        
@@ -69,12 +68,6 @@ ERROR:
     
     ret = [self __setupBuffers4context:m_oglCtx layer:layer view:view];
     CBRA(ret);
-    
-    // build the program
-    m_oglProgram = [[DEF_CLASS(OGLProgram) alloc] initWithVertShader:VERTEX_SHADER
-                                                          fragShader:FRAGMENT_SHADER];
-    [m_oglProgram activate];
-    VGLERR();
     
     // build buffer objects
     ret = [self __setupVBOs];
@@ -138,12 +131,11 @@ ERROR:
     ret = [self __prepareContext4openGL];
     CBR(ret);
     
+    ret = [self __buildProgram4buffer:yuvBuf];
+    CBRA(ret);
+    
     // buffer to texture
-    ret = [m_oglProgram activateTexY:[yuvBuf componentY]
-                                   U:[yuvBuf componentU]
-                                   V:[yuvBuf componentV]
-                               width:[yuvBuf width]
-                              height:[yuvBuf height]];
+    ret = [m_oglProgram activateTexBuffer:yuvBuf];
     CBR(ret);
     
     // draw with tex
@@ -204,6 +196,32 @@ ERROR:
         CBRA(ret);
     }
     
+ERROR:
+    return ret;
+}
+
+- (BOOL)__buildProgram4buffer:(id<DEF_CLASS(YUVBuffer)>)yuvBuf
+{
+    BOOL ret = YES;
+    
+    if (m_oglProgram && [m_oglProgram pixel_format] == [yuvBuf pix_fmt])
+    {
+        // reuse
+        FINISH();
+    }
+    
+    // something wrong if we need to change the ogl-program
+    VBR(m_oglProgram == nil);
+    
+    // build the program
+    m_oglProgram = [[DEF_CLASS(OGLProgram) alloc] initWithPixFmt:[yuvBuf pix_fmt]];
+    CPRA(m_oglProgram);
+    
+    ret = [m_oglProgram activate];
+    VGLERR();
+    CBRA(ret);
+    
+DONE:
 ERROR:
     return ret;
 }

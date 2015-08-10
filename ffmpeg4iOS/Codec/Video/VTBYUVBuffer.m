@@ -16,12 +16,11 @@
     
     int32_t m_width;
     int32_t m_height;
-    CVPlanarPixelBufferInfo_YCbCrPlanar *m_planars;
+    CVPlanarPixelBufferInfo_YCbCrBiPlanar *m_planars;
     OSType m_fmt_type;
     
     int32_t m_offst_Y;
-    int32_t m_offst_U;
-    int32_t m_offst_V;
+    int32_t m_offst_UV;
     
     int64_t m_pts;
 }
@@ -45,7 +44,7 @@
     
     size_t w = 0;
     size_t h = 0;
-    CVPlanarPixelBufferInfo_YCbCrPlanar *planars = NULL;
+    CVPlanarPixelBufferInfo_YCbCrBiPlanar *planars = NULL;
     OSType fmt_type = 0;
     
     [self cleanup];
@@ -55,13 +54,13 @@
     CVPixelBufferLockBaseAddress(imageBuffer, 0);
     
     fmt_type = CVPixelBufferGetPixelFormatType(imageBuffer);
-    CBRA(fmt_type == kCVPixelFormatType_420YpCbCr8Planar);
+    CBRA(fmt_type == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
     
     w = CVPixelBufferGetWidth(imageBuffer);
     h = CVPixelBufferGetHeight(imageBuffer);
     CBRA(w > 0 && h > 0);
     
-    planars = (CVPlanarPixelBufferInfo_YCbCrPlanar*)CVPixelBufferGetBaseAddress(imageBuffer);
+    planars = (CVPlanarPixelBufferInfo_YCbCrBiPlanar*)CVPixelBufferGetBaseAddress(imageBuffer);
     CPRA(planars);
     
     // detach
@@ -74,8 +73,7 @@
     m_fmt_type = fmt_type;
     
     m_offst_Y = BINT32ToUInt32((uint8_t*)&m_planars->componentInfoY.offset);
-    m_offst_U = BINT32ToUInt32((uint8_t*)&m_planars->componentInfoCb.offset);
-    m_offst_V = BINT32ToUInt32((uint8_t*)&m_planars->componentInfoCr.offset);
+    m_offst_UV = BINT32ToUInt32((uint8_t*)&m_planars->componentInfoCbCr.offset);
     
     m_pts = pts;
     
@@ -105,11 +103,18 @@ ERROR:
 }
 - (const uint8_t*)componentU
 {
-    return m_offst_U + (const uint8_t*)m_planars;
+    VERROR();
+    return NULL;
 }
 - (const uint8_t*)componentV
 {
-    return m_offst_V + (const uint8_t*)m_planars;
+    VERROR();
+    return NULL;
+}
+
+- (const uint8_t*)componentUV
+{
+    return m_offst_UV + (const uint8_t*)m_planars;
 }
 
 - (int64_t)pts
@@ -120,9 +125,9 @@ ERROR:
 - (enum AVPixelFormat)pix_fmt
 {
     VBR(![self isReady] ||
-        m_fmt_type == kCVPixelFormatType_420YpCbCr8Planar);
+        m_fmt_type == kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange);
     
-    return AV_PIX_FMT_YUV420P;
+    return AV_PIX_FMT_NV12;
 }
 
 - (int)repeat_pict
@@ -148,8 +153,7 @@ ERROR:
     m_fmt_type = 0;
     
     m_offst_Y = 0;
-    m_offst_U = 0;
-    m_offst_V = 0;
+    m_offst_UV = 0;
     
     m_pts = AV_NOPTS_VALUE;
 }

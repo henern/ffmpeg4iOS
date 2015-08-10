@@ -16,6 +16,7 @@
 - (const uint8_t*)componentY;
 - (const uint8_t*)componentU;
 - (const uint8_t*)componentV;
+- (const uint8_t*)componentUV;      // if NV12
 
 - (int64_t)pts;
 - (enum AVPixelFormat)pix_fmt;

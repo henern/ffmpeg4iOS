@@ -9,11 +9,14 @@
 #import "OGLProgram.h"
 #import <OpenGLES/EAGLDrawable.h>
 #import <QuartzCore/QuartzCore.h>
+#import "Shaders.h"
 
 @interface DEF_CLASS(OGLProgram) ()
 {
     GLuint _prgrmOGL;
 }
+
+@property (nonatomic, assign) enum AVPixelFormat pixel_format;
 
 - (GLuint)_buildWithFragShader:(const char *)aFrag vertexShader:(const char*)aVert;
 - (GLuint)_buildShader:(const char *)source type:(GLenum)type;
@@ -21,6 +24,24 @@
 @end
 
 @implementation DEF_CLASS(OGLProgram)
+
+- (instancetype)initWithPixFmt:(enum AVPixelFormat)pixFmt
+{
+    self.pixel_format = pixFmt;
+    
+    if (pixFmt == AV_PIX_FMT_YUV420P)
+    {
+        return [self initWithVertShader:VERTEX_SHADER fragShader:FRAGMENT_SHADER];
+    }
+    
+    if (pixFmt == AV_PIX_FMT_NV12)
+    {
+        return [self initWithVertShader:NV12_VERTEX_SHDR fragShader:NV12_FRAGMENT_SHDR];
+    }
+    
+    VERROR();
+    return [super init];
+}
 
 - (id)initWithVertShader:(const char*)vertShdr fragShader:(const char*)fragShdr
 {
@@ -59,6 +80,33 @@
     }
     
     return GL_NO_ERROR == glGetError();
+}
+
+- (BOOL)activateTexBuffer:(id<DEF_CLASS(YUVBuffer)>)yuvBuf
+{
+    if ([yuvBuf pix_fmt] != self.pixel_format)
+    {
+        VERROR();
+        return NO;
+    }
+    
+    if (self.pixel_format == AV_PIX_FMT_NV12)
+    {
+        return [self activateTexY:[yuvBuf componentY]
+                               UV:[yuvBuf componentUV]
+                            width:[yuvBuf width]
+                           height:[yuvBuf height]];
+    }
+    else if (self.pixel_format == AV_PIX_FMT_YUV420P)
+    {
+        return [self activateTexY:[yuvBuf componentY]
+                                U:[yuvBuf componentU]
+                                V:[yuvBuf componentV]
+                            width:[yuvBuf width]
+                           height:[yuvBuf height]];
+    }
+    
+    return NO;
 }
 
 - (BOOL)activateTexY:(const void *)bytesY
@@ -108,11 +156,48 @@
     return GL_NO_ERROR == glGetError();
 }
 
+- (BOOL)activateTexY:(const void *)bytesY
+                  UV:(const void *)bytesUV
+               width:(GLsizei)width
+              height:(GLsizei)height
+{
+    // FIXME: consider CVOpenGLESTextureCacheCreateTextureFromImage for better perf?
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, self.texY);
+    glUniform1i(self.uniformTexY, 0);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RED_EXT,
+                 width, height,
+                 0,
+                 GL_RED_EXT, GL_UNSIGNED_BYTE,
+                 bytesY);
+    VGLERR();
+    
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, self.texUV);
+    glUniform1i(self.uniformTexUV, 1);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RG_EXT,
+                 width/2, height/2,
+                 0,
+                 GL_RG_EXT, GL_UNSIGNED_BYTE,
+                 bytesUV);
+    VGLERR();
+        
+    glUniformMatrix3fv(self.uniformMatColorConversion, 1, GL_FALSE, kColorConversion709);
+    
+    return GL_NO_ERROR == glGetError();
+}
+
 - (void)dealloc
 {
-    glDeleteTextures(1, &_texY);
-    glDeleteTextures(1, &_texU);
-    glDeleteTextures(1, &_texV);
+    [self _destroyTex:&_texY];
+    [self _destroyTex:&_texU];
+    [self _destroyTex:&_texV];
+    [self _destroyTex:&_texUV];
 }
 
 #pragma mark private
@@ -174,17 +259,42 @@
     // locate the texture uniforms, see frag shader
     self.uniformTexY = glGetUniformLocation(_prgrmOGL, "videoFrameY");
     VGLERR();
-    self.uniformTexU = glGetUniformLocation(_prgrmOGL, "videoFrameU");
-    VGLERR();
-    self.uniformTexV = glGetUniformLocation(_prgrmOGL, "videoFrameV");
-    VGLERR();
+    
+    if (self.pixel_format == AV_PIX_FMT_YUV420P)
+    {
+        self.uniformTexU = glGetUniformLocation(_prgrmOGL, "videoFrameU");
+        self.uniformTexV = glGetUniformLocation(_prgrmOGL, "videoFrameV");
+        VGLERR();
+    }
+    else if (self.pixel_format == AV_PIX_FMT_NV12)
+    {
+        self.uniformTexUV = glGetUniformLocation(_prgrmOGL, "videoFrameUV");
+        self.uniformMatColorConversion = glGetUniformLocation(_prgrmOGL, "matColorConversion");
+        VGLERR();
+    }
+    else
+    {
+        VERROR();
+    }
 }
 
 - (BOOL)_initTextures
 {
     self.texY = [self _initTexture:GL_TEXTURE0];
-    self.texU = [self _initTexture:GL_TEXTURE1];
-    self.texV = [self _initTexture:GL_TEXTURE2];
+    
+    if (self.pixel_format == AV_PIX_FMT_YUV420P)
+    {
+        self.texU = [self _initTexture:GL_TEXTURE1];
+        self.texV = [self _initTexture:GL_TEXTURE2];
+    }
+    else if (self.pixel_format == AV_PIX_FMT_NV12)
+    {
+        self.texUV = [self _initTexture:GL_TEXTURE1];
+    }
+    else
+    {
+        VERROR();
+    }
     
     return GL_NO_ERROR == glGetError();
 }
@@ -209,6 +319,15 @@
     VGLERR();
     
     return ret;
+}
+
+- (void)_destroyTex:(GLuint*)tex
+{
+    if (tex && *tex)
+    {
+        glDeleteTextures(0, tex);
+        *tex = NULL;
+    }
 }
 
 @end

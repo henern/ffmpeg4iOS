@@ -15,4 +15,8 @@
 #define FRAGMENT_SHADER     fragmentShader
 #define VERTEX_SHADER       vertexShader
 
+#import "./Shader/NV122RGB.frag"
+#define NV12_FRAGMENT_SHDR  nv12_fragment_shdr
+#define NV12_VERTEX_SHDR    vertexShader
+
 #endif
