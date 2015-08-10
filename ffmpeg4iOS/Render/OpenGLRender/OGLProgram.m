@@ -120,10 +120,10 @@
     glUniform1i(self.uniformTexY, 0);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_LUMINANCE,
+                 GL_RED_EXT,
                  width, height,
                  0,
-                 GL_LUMINANCE, GL_UNSIGNED_BYTE,
+                 GL_RED_EXT, GL_UNSIGNED_BYTE,
                  bytesY);
     VGLERR();
     
@@ -132,10 +132,10 @@
     glUniform1i(self.uniformTexU, 1);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_LUMINANCE,
+                 GL_RED_EXT,
                  width/2, height/2,
                  0,
-                 GL_LUMINANCE, GL_UNSIGNED_BYTE,
+                 GL_RED_EXT, GL_UNSIGNED_BYTE,
                  bytesU);
     VGLERR();
     
@@ -144,14 +144,12 @@
     glUniform1i(self.uniformTexV, 2);
     glTexImage2D(GL_TEXTURE_2D,
                  0,
-                 GL_LUMINANCE,
+                 GL_RED_EXT,
                  width/2, height/2,
                  0,
-                 GL_LUMINANCE, GL_UNSIGNED_BYTE,
+                 GL_RED_EXT, GL_UNSIGNED_BYTE,
                  bytesV);
     VGLERR();
-    
-    glActiveTexture(GL_TEXTURE0);
     
     return GL_NO_ERROR == glGetError();
 }

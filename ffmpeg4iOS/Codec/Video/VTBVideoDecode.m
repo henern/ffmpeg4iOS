@@ -114,8 +114,8 @@ ERROR:
     // callback config
     VTDecompressionOutputCallbackRecord callbackRec = {vtb_video_decode_callback, (__bridge void*)self};
     
-    // we need NV12, not YUV420P
-    // YUV420P is NOT OpenGLES compatible, which cost glTexImage2D ~100ms
+    // we need NV12 (OpenGLES-compatible), not YUV420P.
+    // it costs VTB a lot to run the conversion (NV12 ==> YUV420P).
     NSDictionary *destImgBufAttr = [NSDictionary dictionaryWithObjectsAndKeys:
                                     [NSNumber numberWithBool:YES], (id)kCVPixelBufferOpenGLESCompatibilityKey, nil];
     
