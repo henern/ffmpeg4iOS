@@ -10,10 +10,12 @@
 #import <OpenGLES/EAGLDrawable.h>
 #import <QuartzCore/QuartzCore.h>
 #import "Shaders.h"
+#import "OpenGLESTexProvider.h"
 
 @interface DEF_CLASS(OGLProgram) ()
 {
     GLuint _prgrmOGL;
+    CVOpenGLESTextureCacheRef _oglTexCache;
 }
 
 @property (nonatomic, assign) enum AVPixelFormat pixel_format;
@@ -82,7 +84,7 @@
     return GL_NO_ERROR == glGetError();
 }
 
-- (BOOL)activateTexBuffer:(id<DEF_CLASS(YUVBuffer)>)yuvBuf
+- (BOOL)activateTexBuffer:(id<DEF_CLASS(YUVBuffer)>)yuvBuf oglContext:(EAGLContext*)oglCtx
 {
     if ([yuvBuf pix_fmt] != self.pixel_format)
     {
@@ -90,7 +92,16 @@
         return NO;
     }
     
-    if (self.pixel_format == AV_PIX_FMT_NV12)
+    if (self.pixel_format == AV_PIX_FMT_NV12 &&
+        [yuvBuf conformsToProtocol:@protocol(DEF_CLASS(OpenGLESTexProvider))])
+    {
+        id<DEF_CLASS(OpenGLESTexProvider)> provider = (id<DEF_CLASS(OpenGLESTexProvider)>)yuvBuf;
+        return [self activateTexProvider:provider
+                                 context:oglCtx
+                                   width:[yuvBuf width]
+                                  height:[yuvBuf height]];
+    }
+    else if (self.pixel_format == AV_PIX_FMT_NV12)
     {
         return [self activateTexY:[yuvBuf componentY]
                                UV:[yuvBuf componentUV]
@@ -159,8 +170,6 @@
                width:(GLsizei)width
               height:(GLsizei)height
 {
-    // FIXME: consider CVOpenGLESTextureCacheCreateTextureFromImage for better perf?
-    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, self.texY);
     glUniform1i(self.uniformTexY, 0);
@@ -188,12 +197,71 @@
     return GL_NO_ERROR == glGetError();
 }
 
+- (BOOL)activateTexProvider:(id<DEF_CLASS(OpenGLESTexProvider)>)provider
+                    context:(EAGLContext*)oglCtx
+                      width:(GLsizei)width
+                     height:(GLsizei)height
+{
+    BOOL ret = YES;
+    CVReturn err = kCVReturnSuccess;
+    GLuint texY = 0;
+    GLuint texUV = 0;
+    
+    CPRA(oglCtx);
+    
+    if (!_oglTexCache)
+    {
+        // remove textures
+        [self _cleanup];
+        
+        err = CVOpenGLESTextureCacheCreate(kCFAllocatorDefault, NULL, oglCtx, NULL, &_oglTexCache);
+    }
+    CPRA(_oglTexCache);
+    
+    // flush
+    CVOpenGLESTextureCacheFlush(_oglTexCache, 0);
+    
+    // Y
+    glActiveTexture(GL_TEXTURE0);
+    texY = [provider ogl_texY4cache:_oglTexCache];
+    CBRA(texY);
+    self.texY = texY;
+    glUniform1i(self.uniformTexY, 0);
+    VGLERR();
+    
+    // UV
+    glActiveTexture(GL_TEXTURE1);
+    texUV = [provider ogl_texUV4cache:_oglTexCache];
+    CBRA(texUV);
+    self.texUV = texUV;
+    glUniform1i(self.uniformTexUV, 1);
+    VGLERR();
+    
+    CBRA(texY && texUV);
+    VBR(self.texY == texY);
+    VBR(self.texUV == texUV);
+    
+ERROR:
+    if (!ret)
+    {
+        VERROR();
+        [self _cleanup];
+    }
+    
+    return ret;
+}
+
+
+
 - (void)dealloc
 {
-    [self _destroyTex:&_texY];
-    [self _destroyTex:&_texU];
-    [self _destroyTex:&_texV];
-    [self _destroyTex:&_texUV];
+    if (_oglTexCache)
+    {
+        CFRelease(_oglTexCache);
+        _oglTexCache = NULL;
+    }
+    
+    [self _cleanup];
 }
 
 #pragma mark private
@@ -320,9 +388,17 @@
 {
     if (tex && *tex)
     {
-        glDeleteTextures(0, tex);
+        glDeleteTextures(1, tex);
         *tex = NULL;
     }
+}
+
+- (void)_cleanup
+{
+    [self _destroyTex:&_texY];
+    [self _destroyTex:&_texU];
+    [self _destroyTex:&_texV];
+    [self _destroyTex:&_texUV];
 }
 
 @end

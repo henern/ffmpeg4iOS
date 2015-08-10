@@ -8,8 +8,9 @@
 
 #import "YUVBuffer.h"
 #import <VideoToolbox/VideoToolbox.h>
+#import "OpenGLESTexProvider.h"
 
-@interface DEF_CLASS(VTBYUVBuffer) : NSObject <DEF_CLASS(YUVBuffer)>
+@interface DEF_CLASS(VTBYUVBuffer) : NSObject <DEF_CLASS(YUVBuffer), DEF_CLASS(OpenGLESTexProvider)>
 
 - (BOOL)attach2imageBuf:(CVImageBufferRef)imgBuf pts:(int64_t)pts;
 - (BOOL)isReady;

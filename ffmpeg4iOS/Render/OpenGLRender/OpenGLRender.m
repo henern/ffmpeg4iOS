@@ -135,7 +135,7 @@ ERROR:
     CBRA(ret);
     
     // buffer to texture
-    ret = [m_oglProgram activateTexBuffer:yuvBuf];
+    ret = [m_oglProgram activateTexBuffer:yuvBuf oglContext:m_oglCtx];
     CBR(ret);
     
     // draw with tex

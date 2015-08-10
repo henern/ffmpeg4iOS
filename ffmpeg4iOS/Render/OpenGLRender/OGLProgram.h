@@ -25,15 +25,9 @@
 @property (nonatomic, assign) GLuint texV;
 @property (nonatomic, assign) GLuint texUV;
 
-- (BOOL)activateTexY:(const void *)bytesY
-                   U:(const void *)bytesU
-                   V:(const void *)bytesV
-               width:(GLsizei)width
-              height:(GLsizei)height;
-
 - (BOOL)activate;
 - (instancetype)initWithPixFmt:(enum AVPixelFormat)pixFmt;
 - (enum AVPixelFormat)pixel_format;
-- (BOOL)activateTexBuffer:(id<DEF_CLASS(YUVBuffer)>)yuvBuf;
+- (BOOL)activateTexBuffer:(id<DEF_CLASS(YUVBuffer)>)yuvBuf oglContext:(EAGLContext*)oglCtx;
 
 @end
