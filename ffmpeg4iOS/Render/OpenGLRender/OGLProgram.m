@@ -186,8 +186,6 @@
                  GL_RG_EXT, GL_UNSIGNED_BYTE,
                  bytesUV);
     VGLERR();
-        
-    glUniformMatrix3fv(self.uniformMatColorConversion, 1, GL_FALSE, kColorConversion709);
     
     return GL_NO_ERROR == glGetError();
 }
@@ -269,7 +267,6 @@
     else if (self.pixel_format == AV_PIX_FMT_NV12)
     {
         self.uniformTexUV = glGetUniformLocation(_prgrmOGL, "videoFrameUV");
-        self.uniformMatColorConversion = glGetUniformLocation(_prgrmOGL, "matColorConversion");
         VGLERR();
     }
     else

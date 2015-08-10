@@ -19,7 +19,6 @@
 @property (nonatomic, assign) GLuint uniformTexU;
 @property (nonatomic, assign) GLuint uniformTexV;
 @property (nonatomic, assign) GLuint uniformTexUV;
-@property (nonatomic, assign) GLuint uniformMatColorConversion;
 
 @property (nonatomic, assign) GLuint texY;
 @property (nonatomic, assign) GLuint texU;
