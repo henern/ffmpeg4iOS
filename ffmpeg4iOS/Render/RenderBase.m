@@ -246,8 +246,9 @@ ERROR:
     CBR(err == ERR_SUCCESS);
     CPRA(yuvBuf);
     
-    // FIXME: render only supports YUV420P now
-    CBRA([yuvBuf pix_fmt] == AV_PIX_FMT_YUV420P);
+    // only supports YUV420P & NV12 now
+    CBRA([yuvBuf pix_fmt] == AV_PIX_FMT_YUV420P ||
+         [yuvBuf pix_fmt] == AV_PIX_FMT_NV12);
     
     if (finished)
     {
