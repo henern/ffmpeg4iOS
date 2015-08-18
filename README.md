@@ -22,7 +22,8 @@ Features
 
 Samples
 -------
-coming (not that soon) ...
+1. a simple [demo](https://github.com/henern/ffmpeg4iOS/tree/master/test/sample)
+2. coming (not that soon) ...
 
 TODO
 ----
