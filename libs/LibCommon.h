@@ -33,5 +33,7 @@
 // condition
 #define WAIT_CONDITION(c)       [(c) lock];[(c) wait];[(c) unlock]
 #define SIGNAL_CONDITION(c)     [(c) lock];[(c) signal];[(c) unlock]
+#define WAIT_CONDITION_BEGIN(c) [(c) lock]
+#define WAIT_CONDITION_END(c)   [(c) wait];[(c) unlock]
 
 #endif

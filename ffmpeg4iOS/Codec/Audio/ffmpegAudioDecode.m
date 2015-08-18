@@ -96,6 +96,8 @@ ERROR:
     AVFrame *avfDecoded = av_frame_alloc();
     int got_frame = 0;
     int decode_len = 0;
+    int64_t expect_pts = AV_NOPTS_VALUE;
+    BOOL big_fix_to_pts = NO;
     
     CPRA(buffer);
     CPRA(bufStartTime);
@@ -154,9 +156,19 @@ DECODE_PKT:
         m_offset_swrBuf = 0;
         m_len_swrBuf = avf_size;
         
-        if (m_best_pts_base == AV_NOPTS_VALUE)
+        // pts from ffmpeg
+        expect_pts = av_frame_get_best_effort_timestamp(avfDecoded) * time_base * av_frame_get_sample_rate(avfDecoded);
+        CBRA(expect_pts != AV_NOPTS_VALUE);
+        
+        // for some audio trak, pts may change a lot suddenly, because ffmpeg is fixing it.
+        big_fix_to_pts = (llabs(expect_pts - m_best_pts_base) * 2 > av_frame_get_sample_rate(avfDecoded));
+        
+        // NOTE: ONLY refresh m_best_pts_base if NOPTS, or there is a fix.
+        //       but in normal case, expect_pts is inaccurate, which cause much noise in audio playback.
+        //       we should update m_best_pts_base by counting the frames.
+        if (m_best_pts_base == AV_NOPTS_VALUE || big_fix_to_pts)
         {
-        m_best_pts_base = av_frame_get_best_effort_timestamp(avfDecoded) * time_base * av_frame_get_sample_rate(avfDecoded);
+            m_best_pts_base = expect_pts;
         }
         
         // flush

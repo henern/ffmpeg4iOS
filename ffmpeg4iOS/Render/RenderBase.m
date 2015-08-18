@@ -345,11 +345,13 @@ ERROR:
     
     if (m_render_thread)
     {
+        WAIT_CONDITION_BEGIN(m_signal_thread_quit);
+        
         [self.pkt_queue reset];
         [self __appendQuitPacket];
         
         // block until the thread finished
-        WAIT_CONDITION(m_signal_thread_quit);
+        WAIT_CONDITION_END(m_signal_thread_quit);
     }
     
     m_signal_thread_quit = nil;
