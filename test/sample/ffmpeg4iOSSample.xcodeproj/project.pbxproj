@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		232A24AB1B5B72020074F5A5 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 232A24AA1B5B72020074F5A5 /* Foundation.framework */; };
 		232A24AF1B5B793B0074F5A5 /* CoreMedia.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 232A24AE1B5B793B0074F5A5 /* CoreMedia.framework */; };
+		23386F221B839286001DD3D3 /* libffmpeg4iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23386F1F1B839276001DD3D3 /* libffmpeg4iOS.a */; };
 		2378C8C71B838E91007EC35F /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 2378C8BD1B838E91007EC35F /* AppDelegate.m */; };
 		2378C8C81B838E91007EC35F /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 2378C8BE1B838E91007EC35F /* LaunchScreen.xib */; };
 		2378C8C91B838E91007EC35F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 2378C8C01B838E91007EC35F /* Main.storyboard */; };
@@ -27,9 +28,27 @@
 		23C904631B67CF7000184431 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23C904621B67CF7000184431 /* VideoToolbox.framework */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		23386F1E1B839276001DD3D3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 23386F1A1B839276001DD3D3 /* ffmpeg4iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 23CCC88F173E101A00EB8706;
+			remoteInfo = ffmpeg4iOS;
+		};
+		23386F201B839281001DD3D3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 23386F1A1B839276001DD3D3 /* ffmpeg4iOS.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 23CCC88E173E101A00EB8706;
+			remoteInfo = ffmpeg4iOS;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
 		232A24AA1B5B72020074F5A5 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		232A24AE1B5B793B0074F5A5 /* CoreMedia.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMedia.framework; path = System/Library/Frameworks/CoreMedia.framework; sourceTree = SDKROOT; };
+		23386F1A1B839276001DD3D3 /* ffmpeg4iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ffmpeg4iOS.xcodeproj; path = ../../ffmpeg4iOS.xcodeproj; sourceTree = "<group>"; };
 		2378C8BC1B838E91007EC35F /* AppDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		2378C8BD1B838E91007EC35F /* AppDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		2378C8BF1B838E91007EC35F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
@@ -56,6 +75,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				23386F221B839286001DD3D3 /* libffmpeg4iOS.a in Frameworks */,
 				23C904631B67CF7000184431 /* VideoToolbox.framework in Frameworks */,
 				232A24AF1B5B793B0074F5A5 /* CoreMedia.framework in Frameworks */,
 				232A24AB1B5B72020074F5A5 /* Foundation.framework in Frameworks */,
@@ -71,6 +91,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		23386F1B1B839276001DD3D3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				23386F1F1B839276001DD3D3 /* libffmpeg4iOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		2378C8BB1B838E91007EC35F /* ffmpeg4iOSSample */ = {
 			isa = PBXGroup;
 			children = (
@@ -118,6 +146,7 @@
 		239B6B6F1B5AC46A00A6EB7D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				23386F1A1B839276001DD3D3 /* ffmpeg4iOS.xcodeproj */,
 				23C904621B67CF7000184431 /* VideoToolbox.framework */,
 				232A24AE1B5B793B0074F5A5 /* CoreMedia.framework */,
 				232A24AA1B5B72020074F5A5 /* Foundation.framework */,
@@ -145,6 +174,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				23386F211B839281001DD3D3 /* PBXTargetDependency */,
 			);
 			name = ffmpeg4iOSSample;
 			productName = ffmpegTest;
@@ -176,12 +206,28 @@
 			mainGroup = 239B6B2E1B5AC1EC00A6EB7D;
 			productRefGroup = 239B6B381B5AC1EC00A6EB7D /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 23386F1B1B839276001DD3D3 /* Products */;
+					ProjectRef = 23386F1A1B839276001DD3D3 /* ffmpeg4iOS.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				239B6B361B5AC1EC00A6EB7D /* ffmpeg4iOSSample */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		23386F1F1B839276001DD3D3 /* libffmpeg4iOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libffmpeg4iOS.a;
+			remoteRef = 23386F1E1B839276001DD3D3 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		239B6B351B5AC1EC00A6EB7D /* Resources */ = {
@@ -211,6 +257,14 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		23386F211B839281001DD3D3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = ffmpeg4iOS;
+			targetProxy = 23386F201B839281001DD3D3 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		2378C8BE1B838E91007EC35F /* LaunchScreen.xib */ = {
