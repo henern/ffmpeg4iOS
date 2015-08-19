@@ -19,4 +19,8 @@
 #define NV12_FRAGMENT_SHDR  nv12_fragment_shdr
 #define NV12_VERTEX_SHDR    vertexShader
 
+#import "./Shader/UYVY2RGB.frag"
+#define UYVY_FRAGMENT_SHDR  uyvy_fragment_shdr
+#define UYVY_VERTEX_SHDR    vertexShader
+
 #endif

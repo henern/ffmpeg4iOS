@@ -13,7 +13,12 @@
 
 @protocol DEF_CLASS(OpenGLESTexProvider) <NSObject>
 
+- (BOOL)supportPixelFmt:(OSType)fmt_type;
+
 - (GLuint)ogl_texY4cache:(CVOpenGLESTextureCacheRef)texCache;
+
+// NOTE: for those Y, U, and V are interspersed (e.g. 2VUY), this is the full YUV.
+//       for those planar format (e.g. NV12), this is UV.
 - (GLuint)ogl_texUV4cache:(CVOpenGLESTextureCacheRef)texCache;
 
 @end

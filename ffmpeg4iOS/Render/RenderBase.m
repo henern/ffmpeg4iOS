@@ -246,9 +246,10 @@ ERROR:
     CBR(err == ERR_SUCCESS);
     CPRA(yuvBuf);
     
-    // only supports YUV420P & NV12 now
+    // only supports YUV420P, 2VUY & NV12 now
     CBRA([yuvBuf pix_fmt] == AV_PIX_FMT_YUV420P ||
-         [yuvBuf pix_fmt] == AV_PIX_FMT_NV12);
+         [yuvBuf pix_fmt] == AV_PIX_FMT_NV12 ||
+         [yuvBuf pix_fmt] == AV_PIX_FMT_UYVY422);
     
     if (finished)
     {

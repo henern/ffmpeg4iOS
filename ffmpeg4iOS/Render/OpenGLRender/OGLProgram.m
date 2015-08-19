@@ -41,6 +41,11 @@
         return [self initWithVertShader:NV12_VERTEX_SHDR fragShader:NV12_FRAGMENT_SHDR];
     }
     
+    if (pixFmt == AV_PIX_FMT_UYVY422)
+    {
+        return [self initWithVertShader:UYVY_VERTEX_SHDR fragShader:UYVY_FRAGMENT_SHDR];
+    }
+    
     VERROR();
     return [super init];
 }
@@ -92,8 +97,10 @@
         return NO;
     }
     
-    if (self.pixel_format == AV_PIX_FMT_NV12 &&
-        [yuvBuf conformsToProtocol:@protocol(DEF_CLASS(OpenGLESTexProvider))])
+    id<DEF_CLASS(OpenGLESTexProvider)> provider = (id<DEF_CLASS(OpenGLESTexProvider)>)yuvBuf;
+    
+    if ([provider conformsToProtocol:@protocol(DEF_CLASS(OpenGLESTexProvider))] &&
+        [provider supportPixelFmt:self.pixel_format])
     {
         id<DEF_CLASS(OpenGLESTexProvider)> provider = (id<DEF_CLASS(OpenGLESTexProvider)>)yuvBuf;
         return [self activateTexProvider:provider
@@ -330,7 +337,8 @@ ERROR:
         self.uniformTexV = glGetUniformLocation(_prgrmOGL, "videoFrameV");
         VGLERR();
     }
-    else if (self.pixel_format == AV_PIX_FMT_NV12)
+    else if (self.pixel_format == AV_PIX_FMT_NV12 ||
+             self.pixel_format == AV_PIX_FMT_UYVY422)
     {
         self.uniformTexUV = glGetUniformLocation(_prgrmOGL, "videoFrameUV");
         VGLERR();
@@ -350,7 +358,8 @@ ERROR:
         self.texU = [self _initTexture:GL_TEXTURE1];
         self.texV = [self _initTexture:GL_TEXTURE2];
     }
-    else if (self.pixel_format == AV_PIX_FMT_NV12)
+    else if (self.pixel_format == AV_PIX_FMT_NV12 ||
+             self.pixel_format == AV_PIX_FMT_UYVY422)
     {
         self.texUV = [self _initTexture:GL_TEXTURE1];
     }

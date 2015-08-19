@@ -54,6 +54,9 @@
 		23F72A961B62895500FC7F3A /* ffmpegPlayerCore.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23F72A6D1B6286D400FC7F3A /* ffmpegPlayerCore.h */; };
 		23F72A991B636C2500FC7F3A /* ThreadSafeDebug.m in Sources */ = {isa = PBXBuildFile; fileRef = 23F72A981B636C2500FC7F3A /* ThreadSafeDebug.m */; };
 		23F72A9F1B63A22100FC7F3A /* ffmpegCanvas.m in Sources */ = {isa = PBXBuildFile; fileRef = 23F72A9E1B63A22100FC7F3A /* ffmpegCanvas.m */; };
+		4A10298C1B84B59500129BE7 /* VTBTexProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A10298B1B84B59500129BE7 /* VTBTexProvider.m */; };
+		4A10298F1B84B5C700129BE7 /* VTBNV12TexProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A10298E1B84B5C700129BE7 /* VTBNV12TexProvider.m */; };
+		4A1029921B84B5DA00129BE7 /* VTB2VUYTexProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A1029911B84B5DA00129BE7 /* VTB2VUYTexProvider.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -540,6 +543,13 @@
 		23F72A981B636C2500FC7F3A /* ThreadSafeDebug.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ThreadSafeDebug.m; sourceTree = "<group>"; };
 		23F72A9D1B63A22100FC7F3A /* ffmpegCanvas.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffmpegCanvas.h; sourceTree = "<group>"; };
 		23F72A9E1B63A22100FC7F3A /* ffmpegCanvas.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ffmpegCanvas.m; sourceTree = "<group>"; };
+		4A10298A1B84B59500129BE7 /* VTBTexProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VTBTexProvider.h; sourceTree = "<group>"; };
+		4A10298B1B84B59500129BE7 /* VTBTexProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VTBTexProvider.m; sourceTree = "<group>"; };
+		4A10298D1B84B5C700129BE7 /* VTBNV12TexProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VTBNV12TexProvider.h; sourceTree = "<group>"; };
+		4A10298E1B84B5C700129BE7 /* VTBNV12TexProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VTBNV12TexProvider.m; sourceTree = "<group>"; };
+		4A1029901B84B5DA00129BE7 /* VTB2VUYTexProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VTB2VUYTexProvider.h; sourceTree = "<group>"; };
+		4A1029911B84B5DA00129BE7 /* VTB2VUYTexProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VTB2VUYTexProvider.m; sourceTree = "<group>"; };
+		4A3C90AE1B8482880008FF0A /* UYVY2RGB.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = UYVY2RGB.frag; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -625,6 +635,12 @@
 				23308FE21B6E7BD3004C9DC8 /* VTBYUVBuffer.h */,
 				23308FE31B6E7BD3004C9DC8 /* VTBYUVBuffer.m */,
 				230660301B78E6D800026E92 /* OpenGLESTexProvider.h */,
+				4A10298A1B84B59500129BE7 /* VTBTexProvider.h */,
+				4A10298B1B84B59500129BE7 /* VTBTexProvider.m */,
+				4A10298D1B84B5C700129BE7 /* VTBNV12TexProvider.h */,
+				4A10298E1B84B5C700129BE7 /* VTBNV12TexProvider.m */,
+				4A1029901B84B5DA00129BE7 /* VTB2VUYTexProvider.h */,
+				4A1029911B84B5DA00129BE7 /* VTB2VUYTexProvider.m */,
 			);
 			path = Video;
 			sourceTree = "<group>";
@@ -1220,6 +1236,7 @@
 				23F72A791B6286D400FC7F3A /* YUV2RGB.frag */,
 				23F72A7A1B6286D400FC7F3A /* YUV2RGB.vert */,
 				2306602C1B784B2100026E92 /* NV122RGB.frag */,
+				4A3C90AE1B8482880008FF0A /* UYVY2RGB.frag */,
 			);
 			path = Shader;
 			sourceTree = "<group>";
@@ -1303,11 +1320,13 @@
 				23F72A821B6286D400FC7F3A /* AudioEngine.m in Sources */,
 				23308FE41B6E7BD3004C9DC8 /* VTBYUVBuffer.m in Sources */,
 				23F72A811B6286D400FC7F3A /* AudioEngine+Factory.m in Sources */,
+				4A10298C1B84B59500129BE7 /* VTBTexProvider.m in Sources */,
 				23F72A931B6286DE00FC7F3A /* AVClockSync.m in Sources */,
 				237B04B51B6D397000226EEF /* ffmpegYUVBuffer.m in Sources */,
 				232F11471B7680D60033F4BC /* ATBAudioDecodeFactory.m in Sources */,
 				237B04AA1B6D2E8800226EEF /* ffmpegVideoDecode.m in Sources */,
 				23F72A831B6286D400FC7F3A /* AudioToolBoxEngine.m in Sources */,
+				4A1029921B84B5DA00129BE7 /* VTB2VUYTexProvider.m in Sources */,
 				23F72A881B6286D400FC7F3A /* RenderBase+Factory.m in Sources */,
 				23F72A871B6286D400FC7F3A /* OpenGLRender.m in Sources */,
 				232F11431B76740E0033F4BC /* ffmpegAudioDecode.m in Sources */,
@@ -1319,6 +1338,7 @@
 				23F72A641B6286C700FC7F3A /* ehm.m in Sources */,
 				23F72A941B6286DE00FC7F3A /* AVPacketsQueue.m in Sources */,
 				23F72A841B6286D400FC7F3A /* ffmpegPlayerCore.m in Sources */,
+				4A10298F1B84B5C700129BE7 /* VTBNV12TexProvider.m in Sources */,
 				23F72A951B6286DE00FC7F3A /* AVStreamEngine.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
