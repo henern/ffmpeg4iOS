@@ -207,71 +207,21 @@ ERROR:
 {
     BOOL ret = YES;
     
-    uint8_t *cursor = NULL;
-    AVC_DecoderConfigurationRecord *avc_decConfigRec = NULL;
     CMFormatDescriptionRef fmt = NULL;
     
-    NSData *buf_SPS = nil;
-    NSData *buf_PPS = nil;
+    NSMutableData *buf_SPS = [NSMutableData dataWithCapacity:64];
+    NSMutableData *buf_PPS = [NSMutableData dataWithCapacity:64];
     
     CPRA(ctxCodec);
     CPRA(ctxCodec->extradata);
-    CBRA(ctxCodec->extradata_size > sizeof(AVC_DecoderConfigurationRecord));
     CPRA(avc_fmt);
     
-    avc_decConfigRec = (AVC_DecoderConfigurationRecord*)ctxCodec->extradata;
-    CPRA(avc_decConfigRec);
-    
-    cursor = &avc_decConfigRec->lengthSizeMinusOne;
-    cursor++;
-    
-    // SPS
-    {
-        AVC_SequenceParameterSets *avc_SPS = (AVC_SequenceParameterSets*)cursor;
-        VPR(avc_SPS);
-
-        int avc_sps_len = BINT16ToUInt16(&avc_SPS->size[0]);
-        CBRA(avc_sps_len > 0);
-        
-        // check NALU type
-        CBRA((avc_SPS->NALUnits[0] & 0x1F) == 7);
-        
-        // only support one sps
-        CBRA((avc_SPS->number & 0x1F) == 1);
-        
-        // fill
-        cursor = &avc_SPS->NALUnits[0];
-        buf_SPS = [NSData dataWithBytes:cursor length:avc_sps_len];
-        VBR([buf_SPS length] == avc_sps_len);
-        
-        // next set
-        cursor += avc_sps_len;
-    }
-    
-    // PPS
-    {
-        AVC_PictureParameterSets *avc_PPS = (AVC_PictureParameterSets*)cursor;
-        VPR(avc_PPS);
-        
-        int avc_pps_len = BINT16ToUInt16(&avc_PPS->size[0]);
-        CBRA(avc_pps_len > 0);
-        
-        // only support one PPS
-        CBRA((avc_PPS->number & 0x1F) == 1);
-        
-        // check NALU type
-        CBRA((avc_PPS->NALUnits[0] & 0x1F) == 8);
-        
-        // fill
-        cursor = &avc_PPS->NALUnits[0];
-        buf_PPS = [NSData dataWithBytes:cursor length:avc_pps_len];
-        VBR([buf_PPS length] == avc_pps_len);
-        
-        // next set
-        cursor += avc_pps_len;
-    }
-    
-    CBRA((cursor - ctxCodec->extradata) <= ctxCodec->extradata_size);
+    ret = [self __extradataAsBox:ctxCodec->extradata
+                            size:ctxCodec->extradata_size
+                             sps:buf_SPS
+                             pps:buf_PPS];
+    CBRA(ret);
+    CBRA([buf_SPS length] > 0 && [buf_PPS length] > 0);
     
     {
         const uint8_t* const paramSetPtrs[2] = { (const uint8_t*)[buf_SPS bytes],
@@ -300,6 +250,76 @@ ERROR:
         fmt = NULL;
     }
     
+    return ret;
+}
+
+- (BOOL)__extradataAsBox:(uint8_t*)extradata
+                    size:(int32_t)extradata_size
+                     sps:(NSMutableData*)buf_SPS
+                     pps:(NSMutableData*)buf_PPS
+{
+    BOOL ret = YES;
+    
+    uint8_t *cursor = NULL;
+    AVC_DecoderConfigurationRecord *avc_decConfigRec = NULL;
+    
+    CBRA(extradata_size > sizeof(AVC_DecoderConfigurationRecord));
+    
+    avc_decConfigRec = (AVC_DecoderConfigurationRecord*)extradata;
+    CPRA(avc_decConfigRec);
+    
+    cursor = &avc_decConfigRec->lengthSizeMinusOne;
+    cursor++;
+    
+    // SPS
+    {
+        AVC_SequenceParameterSets *avc_SPS = (AVC_SequenceParameterSets*)cursor;
+        VPR(avc_SPS);
+
+        int avc_sps_len = BINT16ToUInt16(&avc_SPS->size[0]);
+        CBRA(avc_sps_len > 0);
+        
+        // check NALU type
+        CBRA((avc_SPS->NALUnits[0] & 0x1F) == 7);
+        
+        // only support one sps
+        CBRA((avc_SPS->number & 0x1F) == 1);
+        
+        // fill
+        cursor = &avc_SPS->NALUnits[0];
+        [buf_SPS appendBytes:cursor length:avc_sps_len];
+        VBR([buf_SPS length] == avc_sps_len);
+        
+        // next set
+        cursor += avc_sps_len;
+    }
+    
+    // PPS
+    {
+        AVC_PictureParameterSets *avc_PPS = (AVC_PictureParameterSets*)cursor;
+        VPR(avc_PPS);
+        
+        int avc_pps_len = BINT16ToUInt16(&avc_PPS->size[0]);
+        CBRA(avc_pps_len > 0);
+        
+        // only support one PPS
+        CBRA((avc_PPS->number & 0x1F) == 1);
+        
+        // check NALU type
+        CBRA((avc_PPS->NALUnits[0] & 0x1F) == 8);
+        
+        // fill
+        cursor = &avc_PPS->NALUnits[0];
+        [buf_PPS appendBytes:cursor length:avc_pps_len];
+        VBR([buf_PPS length] == avc_pps_len);
+        
+        // next set
+        cursor += avc_pps_len;
+    }
+    
+    CBRA((cursor - extradata) <= extradata_size);
+    
+ERROR:
     return ret;
 }
 
