@@ -9,6 +9,11 @@
 #import "ViewController.h"
 #import <ffmpeg4iOS/ffmpegPlayerCore.h>
 
+#define __RMVB_RV40_COOK__          0
+#define __MKV_H264_VORBIS__         0
+#define __MP4_H264_AACLOW__         0
+#define __TS_H264_HEACC__           1
+
 @interface ViewController ()
 {
     UITextView *textView_info;
@@ -28,18 +33,23 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     // path to video resource
-#if 0
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"T-ara.1080P.mv" ofType:@"rmvb"];
-#else
+    NSString *path = nil;
+    
+#if __RMVB_RV40_COOK__
+    path = [[NSBundle mainBundle] pathForResource:@"T-ara.1080P.mv" ofType:@"rmvb"];
+#endif
+    
+#if __MKV_H264_VORBIS__
     // FIXME: buggy audio in this mkv
-    NSString *path = [[NSBundle mainBundle] pathForResource:@"老男孩" ofType:@"mkv"];
+    path = [[NSBundle mainBundle] pathForResource:@"老男孩" ofType:@"mkv"];
 #endif
     
-#if 0
-    path = [[NSBundle mainBundle] pathForResource:@"Gangnam" ofType:@"mp4"];
+#if __MP4_H264_AACLOW__
+    path = [[NSBundle mainBundle] pathForResource:@"Opera.480p.x264.AAC" ofType:@"mp4"];
 #endif
     
-#if 1
+#if __TS_H264_HEACC__
+    // online resource, may be expired
     path = @"http://v.ku6.com/fetchwebm/FyuHwi0zd-I-YA5jtA4BWA...m3u8";
 #endif
     
