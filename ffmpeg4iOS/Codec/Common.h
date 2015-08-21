@@ -9,6 +9,10 @@
 #ifndef BDMP4Utils_Common_h
 #define BDMP4Utils_Common_h
 
+#import <_types/_uint8_t.h>
+#import <_types/_uint16_t.h>
+#import <_types/_uint32_t.h>
+
 #define LEN_OF_BYTE                 sizeof(uint8_t)
 #define LEN_OF_BYTES_4_UINT16       2
 #define LEN_OF_BYTES_4_UINT24       3

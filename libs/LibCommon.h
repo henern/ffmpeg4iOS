@@ -18,6 +18,10 @@
 #define DEF_CLASS(name)         DEF_COMBINE(name, WW /* prefix */)
 #define REF_CLASS(name)         DEF_CLASS(name)*
 
+// function
+#define DEF_FUNC(name)          DEF_COMBINE(name, WW /* prefix */)
+#define CALL_FUNC(name)         DEF_FUNC(name)
+
 // log
 #if DEBUG
 #define FFMLOG(...)             NSLog(__VA_ARGS__)

@@ -19,6 +19,7 @@
 		237B04B21B6D367F00226EEF /* ffmpegVideoDecode+Factory.m in Sources */ = {isa = PBXBuildFile; fileRef = 237B04B11B6D367F00226EEF /* ffmpegVideoDecode+Factory.m */; };
 		237B04B51B6D397000226EEF /* ffmpegYUVBuffer.m in Sources */ = {isa = PBXBuildFile; fileRef = 237B04B41B6D397000226EEF /* ffmpegYUVBuffer.m */; };
 		237B04B81B6E195700226EEF /* Utility.m in Sources */ = {isa = PBXBuildFile; fileRef = 237B04B71B6E195700226EEF /* Utility.m */; };
+		23CCC1921B879EA6000245B4 /* ADTSRaw.c in Sources */ = {isa = PBXBuildFile; fileRef = 23CCC1911B879EA6000245B4 /* ADTSRaw.c */; };
 		23CCC893173E101A00EB8706 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23CCC892173E101A00EB8706 /* Foundation.framework */; };
 		23CCC898173E101A00EB8706 /* ffmpeg4iOS.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 23CCC897173E101A00EB8706 /* ffmpeg4iOS.h */; };
 		23CCC89A173E101B00EB8706 /* ffmpeg4iOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 23CCC899173E101B00EB8706 /* ffmpeg4iOS.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
@@ -487,6 +488,8 @@
 		237B04B41B6D397000226EEF /* ffmpegYUVBuffer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ffmpegYUVBuffer.m; sourceTree = "<group>"; };
 		237B04B61B6E195700226EEF /* Utility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Utility.h; sourceTree = "<group>"; };
 		237B04B71B6E195700226EEF /* Utility.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Utility.m; sourceTree = "<group>"; };
+		23CCC1901B879D45000245B4 /* ADTSRaw.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ADTSRaw.h; sourceTree = "<group>"; };
+		23CCC1911B879EA6000245B4 /* ADTSRaw.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = ADTSRaw.c; sourceTree = "<group>"; };
 		23CCC88F173E101A00EB8706 /* libffmpeg4iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libffmpeg4iOS.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		23CCC892173E101A00EB8706 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		23CCC896173E101A00EB8706 /* ffmpeg4iOS-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ffmpeg4iOS-Prefix.pch"; sourceTree = "<group>"; };
@@ -584,6 +587,7 @@
 		232F113D1B7671D10033F4BC /* Audio */ = {
 			isa = PBXGroup;
 			children = (
+				23CCC18F1B879D28000245B4 /* ADTS */,
 				232F113E1B76729B0033F4BC /* AQAudioDecode.h */,
 				232F113F1B76729B0033F4BC /* AQAudioDecode.m */,
 				232F11411B76740E0033F4BC /* ffmpegAudioDecode.h */,
@@ -655,6 +659,15 @@
 				237B04A71B6D2E8800226EEF /* Video */,
 			);
 			path = Codec;
+			sourceTree = "<group>";
+		};
+		23CCC18F1B879D28000245B4 /* ADTS */ = {
+			isa = PBXGroup;
+			children = (
+				23CCC1901B879D45000245B4 /* ADTSRaw.h */,
+				23CCC1911B879EA6000245B4 /* ADTSRaw.c */,
+			);
+			path = ADTS;
 			sourceTree = "<group>";
 		};
 		23CCC884173E101A00EB8706 = {
@@ -1341,6 +1354,7 @@
 				23F72A941B6286DE00FC7F3A /* AVPacketsQueue.m in Sources */,
 				23F72A841B6286D400FC7F3A /* ffmpegPlayerCore.m in Sources */,
 				4A10298F1B84B5C700129BE7 /* VTBNV12TexProvider.m in Sources */,
+				23CCC1921B879EA6000245B4 /* ADTSRaw.c in Sources */,
 				23F72A951B6286DE00FC7F3A /* AVStreamEngine.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

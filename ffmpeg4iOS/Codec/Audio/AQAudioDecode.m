@@ -8,6 +8,7 @@
 
 #import "AQAudioDecode.h"
 #import "ehm.h"
+#import "ADTSRaw.h"
 
 @implementation DEF_CLASS(AQAudioDecode)
 
@@ -32,6 +33,14 @@
     BOOL ret = YES;
     int indx_pkt_in_buf = 0;
     
+    const uint8_t *audio_data = pkt.data;
+    int audio_size = pkt.size;
+    
+    // skip adts if need
+    int header4adts = CALL_FUNC(checkADTSHeader)(audio_data, audio_size);
+    audio_data += header4adts;
+    audio_size -= header4adts;
+    
     // append one packet-description
     indx_pkt_in_buf = buffer->mPacketDescriptionCount;
     buffer->mPacketDescriptionCount++;
@@ -42,13 +51,13 @@
         bufStartTime.mFlags = kAudioTimeStampSampleTimeValid;
     }
     
-    memcpy((uint8_t *)buffer->mAudioData + buffer->mAudioDataByteSize, pkt.data, pkt.size);
+    memcpy((uint8_t *)buffer->mAudioData + buffer->mAudioDataByteSize, audio_data, audio_size);
     buffer->mPacketDescriptions[indx_pkt_in_buf].mStartOffset = buffer->mAudioDataByteSize;
-    buffer->mPacketDescriptions[indx_pkt_in_buf].mDataByteSize = pkt.size;
+    buffer->mPacketDescriptions[indx_pkt_in_buf].mDataByteSize = audio_size;
     buffer->mPacketDescriptions[indx_pkt_in_buf].mVariableFramesInPacket = ctx_codec->frame_size;
     
     // sum
-    buffer->mAudioDataByteSize += pkt.size;
+    buffer->mAudioDataByteSize += audio_size;
  
     *ready = YES;
     
