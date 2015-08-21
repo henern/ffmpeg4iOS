@@ -211,7 +211,7 @@ ERROR:
     
     CMFormatDescriptionRef fmt = NULL;
     
-    const uint8_t *extradata = NULL;
+    uint8_t *extradata = NULL;
     int extradata_size = 0;
     
     NSMutableData *buf_SPS = [NSMutableData dataWithCapacity:64];
