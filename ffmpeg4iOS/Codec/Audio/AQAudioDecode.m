@@ -88,17 +88,54 @@ ERROR:
             audioFormat.mFormatID = kAudioFormatMPEGLayer3;
             break;
         case CODEC_ID_AAC:
-            audioFormat.mFormatID = kAudioFormatMPEG4AAC;
-            audioFormat.mFormatFlags = kMPEG4Object_AAC_Main;
+        {
+            if (codec->profile == FF_PROFILE_AAC_HE)
+            {
+                audioFormat.mFormatID = kAudioFormatMPEG4AAC_HE;
+            }
+            else if (codec->profile == FF_PROFILE_AAC_HE_V2)
+            {
+                audioFormat.mFormatID = kAudioFormatMPEG4AAC_HE_V2;
+            }
+            else
+            {
+                audioFormat.mFormatID = kAudioFormatMPEG4AAC;
+                audioFormat.mFormatFlags = kMPEG4Object_AAC_Main;
+            }
+            
+            if (codec->profile == FF_PROFILE_AAC_LOW)
+            {
+                audioFormat.mFormatFlags = kMPEG4Object_AAC_LC;
+            }
+            else if (codec->profile == FF_PROFILE_AAC_SSR)
+            {
+                audioFormat.mFormatFlags = kMPEG4Object_AAC_SSR;
+            }
+            else if (codec->profile == FF_PROFILE_AAC_LTP)
+            {
+                audioFormat.mFormatFlags = kMPEG4Object_AAC_LTP;
+            }
+            else if (codec->profile == FF_PROFILE_AAC_LD)
+            {
+                // no mapping flag in AudioQueue, use default
+                VERROR();
+            }
+            
             break;
-        case CODEC_ID_AC3:
-            audioFormat.mFormatID = kAudioFormatAC3;
+        }
+        case CODEC_ID_ALAC:
+        {
+            audioFormat.mFormatID = kAudioFormatAppleLossless;      // NOT verified yet
             break;
+        }
         default:
+        {
+            VERROR();
             // FIXME: oops hw decoder is NOT available.
             FFMLOG(@"Error: audio format %d is not supported", codec->codec_id);
-            audioFormat.mFormatID = kAudioFormatAC3;
+            audioFormat.mFormatID = kAudioFormatLinearPCM;
             break;
+        }
     }
     CBRA(audioFormat.mFormatID != UNKNOWN_CODEC_ID);
     
