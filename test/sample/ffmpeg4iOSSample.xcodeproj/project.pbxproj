@@ -26,6 +26,7 @@
 		239B6BA51B5ACCA100A6EB7D /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 239B6BA41B5ACCA100A6EB7D /* AudioToolbox.framework */; };
 		239B6BB81B5B6E9E00A6EB7D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 239B6BB71B5B6E9E00A6EB7D /* UIKit.framework */; };
 		23C904631B67CF7000184431 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23C904621B67CF7000184431 /* VideoToolbox.framework */; };
+		23CCC18E1B87703A000245B4 /* Opera.480p.x264.AAC.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 23CCC18D1B87703A000245B4 /* Opera.480p.x264.AAC.mp4 */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -68,6 +69,7 @@
 		239B6BA41B5ACCA100A6EB7D /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		239B6BB71B5B6E9E00A6EB7D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		23C904621B67CF7000184431 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
+		23CCC18D1B87703A000245B4 /* Opera.480p.x264.AAC.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Opera.480p.x264.AAC.mp4; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 		2378C8CE1B838EFC007EC35F /* resources */ = {
 			isa = PBXGroup;
 			children = (
+				23CCC18D1B87703A000245B4 /* Opera.480p.x264.AAC.mp4 */,
 				2378C8CF1B838EFC007EC35F /* T-ara.1080P.mv.rmvb */,
 				2378C8D01B838EFC007EC35F /* 老男孩.mkv */,
 			);
@@ -238,6 +241,7 @@
 				2378C8D11B838EFC007EC35F /* T-ara.1080P.mv.rmvb in Resources */,
 				2378C8CB1B838E91007EC35F /* Info.plist in Resources */,
 				2378C8CA1B838E91007EC35F /* Images.xcassets in Resources */,
+				23CCC18E1B87703A000245B4 /* Opera.480p.x264.AAC.mp4 in Resources */,
 				2378C8C81B838E91007EC35F /* LaunchScreen.xib in Resources */,
 				2378C8C91B838E91007EC35F /* Main.storyboard in Resources */,
 			);
