@@ -28,7 +28,7 @@
     // Do any additional setup after loading the view, typically from a nib.
     
     // path to video resource
-#if 1
+#if 0
     NSString *path = [[NSBundle mainBundle] pathForResource:@"T-ara.1080P.mv" ofType:@"rmvb"];
 #else
     // FIXME: buggy audio in this mkv
@@ -37,6 +37,10 @@
     
 #if 0
     path = [[NSBundle mainBundle] pathForResource:@"Gangnam" ofType:@"mp4"];
+#endif
+    
+#if 1
+    path = @"http://v.ku6.com/fetchwebm/FyuHwi0zd-I-YA5jtA4BWA...m3u8";
 #endif
     
     screen = [[DEF_CLASS(ffmpegPlayerCore) alloc] initWithFrame:self.view.bounds

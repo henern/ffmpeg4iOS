@@ -11,6 +11,7 @@
 #import "Utility.h"
 #import "ehm.h"
 #import "VTBYUVBuffer.h"
+#import "libavformat/avc.h"
 
 typedef struct
 {
@@ -23,6 +24,8 @@ typedef struct
     CMFormatDescriptionRef m_h264_fmt_desc;
     
     NSMutableArray *m_pendingYUV;
+    
+    BOOL m_require_startcode2len;
 }
 
 - (BOOL)__pushYUV:(REF_CLASS(VTBYUVBuffer))yuv;
@@ -161,10 +164,9 @@ ERROR:
                                             0,
                                             (void*)ctxFrame,
                                             &flag_decode_info);
-    CBRA(err == ERR_SUCCESS);
-    
     // callback should free this
     ctxFrame = NULL;
+    CBRA(err == ERR_SUCCESS);
     
     yuv = [self __popYUV];
     if ([yuv isReady])
@@ -209,6 +211,9 @@ ERROR:
     
     CMFormatDescriptionRef fmt = NULL;
     
+    const uint8_t *extradata = NULL;
+    int extradata_size = 0;
+    
     NSMutableData *buf_SPS = [NSMutableData dataWithCapacity:64];
     NSMutableData *buf_PPS = [NSMutableData dataWithCapacity:64];
     
@@ -216,8 +221,28 @@ ERROR:
     CPRA(ctxCodec->extradata);
     CPRA(avc_fmt);
     
-    ret = [self __extradataAsBox:ctxCodec->extradata
-                            size:ctxCodec->extradata_size
+    if ([self __extradataIsStream:ctxCodec->extradata size:ctxCodec->extradata_size])
+    {
+        // mark
+        m_require_startcode2len = YES;
+        
+        // stream ==> box
+        AVIOContext *pb = NULL;
+        int err = avio_open_dyn_buf(&pb);
+        CBRA(err == ERR_SUCCESS);
+        ff_isom_write_avcc(pb, ctxCodec->extradata, ctxCodec->extradata_size);
+        extradata_size = avio_close_dyn_buf(pb, &extradata);
+    }
+    else
+    {
+        extradata = ctxCodec->extradata;
+        extradata_size = ctxCodec->extradata_size;
+    }
+    CPRA(extradata);
+    CBRA(extradata_size > 0);
+    
+    ret = [self __extradataAsBox:extradata
+                            size:extradata_size
                              sps:buf_SPS
                              pps:buf_PPS];
     CBRA(ret);
@@ -244,6 +269,13 @@ ERROR:
     fmt = NULL;
     
 ERROR:
+    if (extradata && extradata != ctxCodec->extradata)
+    {
+        VBR(m_require_startcode2len);
+        av_free(extradata);
+        extradata = NULL;
+    }
+    
     if (fmt)
     {
         CFRelease(fmt);
@@ -267,6 +299,7 @@ ERROR:
     
     avc_decConfigRec = (AVC_DecoderConfigurationRecord*)extradata;
     CPRA(avc_decConfigRec);
+    CBRA(avc_decConfigRec->configurationVersion == 0x1);
     
     cursor = &avc_decConfigRec->lengthSizeMinusOne;
     cursor++;
@@ -323,30 +356,76 @@ ERROR:
     return ret;
 }
 
+- (BOOL)__extradataIsStream:(const uint8_t*)extradata size:(int32_t)extradata_size
+{
+    BOOL ret = NO;
+    
+    if (extradata_size <= 4)
+    {
+        FINISH();
+    }
+    
+    const uint8_t *p = extradata;
+    
+    // 00 00 00 01 or 00 00 01 ?
+    if (p[0] != 0 || p[1] != 0)
+    {
+        FINISH();
+    }
+    
+    if (p[2] == 0x1 || (p[2] == 0 && p[3] == 0x1))
+    {
+        ret = YES;
+        FINISH();
+    }
+    
+DONE:
+    return ret;
+}
+
 - (int)__sampleBuf4packet:(AVPacket*)pkt
                 codec_fmt:(CMFormatDescriptionRef)codec_fmt
                 sampleBuf:(CMSampleBufferRef*)sampleBuf
 {
     BOOL ret = YES;
     int err = ERR_SUCCESS;
+
+    uint8_t *data_ptr = pkt->data;
+    int32_t data_size = pkt->size;
     
     CMBlockBufferRef dataBlock = nil;
     CMSampleBufferRef sample = nil;
     
     CPRA(sampleBuf);
     
+    // startcode to len if need
+    if (m_require_startcode2len)
+    {        
+        AVIOContext *pb = NULL;
+        err = avio_open_dyn_buf(&pb);
+        CBRA(err == ERR_SUCCESS);
+        
+        ff_avc_parse_nal_units(pb, pkt->data, pkt->size);
+        data_size = avio_close_dyn_buf(pb, &data_ptr);
+        CBRA(data_size > 0);
+        CPRA(data_ptr);
+    }
+    
     // block buffer
     err = CMBlockBufferCreateWithMemoryBlock(NULL,
-                                             pkt->data,
-                                             pkt->size,
+                                             data_ptr,
+                                             data_size,
                                              kCFAllocatorNull,
                                              NULL,
                                              0,
-                                             pkt->size,
+                                             data_size,
                                              0,
                                              &dataBlock);
     CBRA(err == kCMBlockBufferNoErr);
     CPRA(dataBlock);
+    
+    // dataBlock holds data_ptr now
+    data_ptr = NULL;
     
     err = CMSampleBufferCreate(NULL,
                                dataBlock,
@@ -368,6 +447,12 @@ ERROR:
     sample = NULL;
     
 ERROR:
+    if (data_ptr && data_ptr != pkt->data)
+    {
+        av_free(data_ptr);
+        data_ptr = NULL;
+    }
+    
     if (dataBlock)
     {
         CFRelease(dataBlock);
@@ -433,6 +518,7 @@ ERROR:
     }
     
     [m_pendingYUV removeAllObjects];
+    m_require_startcode2len = NO;
 }
 
 @end

@@ -474,6 +474,7 @@
 		23369116173FA5510051BFEA /* swscale_internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = swscale_internal.h; sourceTree = "<group>"; };
 		23369117173FA5510051BFEA /* swscale.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = swscale.h; sourceTree = "<group>"; };
 		23369118173FA5510051BFEA /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
+		235E59CE1B86E19F00E55665 /* avc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = avc.h; sourceTree = "<group>"; };
 		2374A8781B4934C10069CE94 /* CyberPlayerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CyberPlayerController.h; sourceTree = "<group>"; };
 		237532961755054700AF4BB3 /* ehm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ehm.h; sourceTree = "<group>"; };
 		2375329D1755123300AF4BB3 /* ffmpegPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ffmpegPlayer.h; sourceTree = "<group>"; };
@@ -1036,6 +1037,7 @@
 		23CCC91A173E2BD300EB8706 /* libavformat */ = {
 			isa = PBXGroup;
 			children = (
+				235E59CE1B86E19F00E55665 /* avc.h */,
 				2336910B173FA5220051BFEA /* avformat.h */,
 				2336910C173FA5220051BFEA /* avio.h */,
 				2336910D173FA5220051BFEA /* version.h */,
