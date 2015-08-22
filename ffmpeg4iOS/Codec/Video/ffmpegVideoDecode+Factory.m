@@ -15,6 +15,8 @@
 
 + (REF_CLASS(ffmpegVideoDecode))decoder4codec:(AVCodecContext*)ctxCodec
 {
+    FFMLOG_OC(@"video-codec: #%ld, %s", (int32_t)ctxCodec->codec_id, ctxCodec->codec->long_name);
+    
     if ([DEF_CLASS(VTBVideoDecode) supportCodec:ctxCodec])
     {
         return [[DEF_CLASS(VTBVideoDecode) alloc] init];

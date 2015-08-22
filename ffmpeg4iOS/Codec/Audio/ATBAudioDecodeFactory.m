@@ -14,10 +14,12 @@
 
 + (id<DEF_CLASS(ATBAudioDecode)>)audioDecoder4codec:(AVCodecContext*)codec
 {
+    FFMLOG_OC(@"audio-codec: #%ld, %s", (int32_t)codec->codec_id, codec->codec->long_name);
+    
     enum AVCodecID cid = codec->codec_id;
     if (CODEC_ID_MP3 == cid ||
         CODEC_ID_AAC == cid ||
-        CODEC_ID_AC3 == cid)
+        CODEC_ID_ALAC == cid)
     {
         return [[DEF_CLASS(AQAudioDecode) alloc] init];
     }

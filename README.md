@@ -18,7 +18,8 @@ Features
 4. video: OpenGLES 2.0
 5. audio: AudioQueue
 6. hardware accelerator: mp3 + aac + he-aac, h264, 
-7. coming (not that soon) ...
+7. misc: customized-user-agent, 
+8. coming (not that soon) ...
 
 Samples
 -------
@@ -28,8 +29,7 @@ Samples
 TODO
 ----
 1. https
-2. customized user-agent
-3. subtitles
+2. subtitles
 
 License
 -------

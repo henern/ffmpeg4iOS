@@ -131,7 +131,9 @@ ERROR:
     
     if (m_imgBuffer)
     {
+#if 0
         FFMLOG_OC(@"cleanup with image-buffer %x", (void*)m_imgBuffer);
+#endif
 
         CVPixelBufferUnlockBaseAddress(m_imgBuffer, 0);
         CVBufferRelease(m_imgBuffer);

@@ -251,11 +251,14 @@ ERROR:
     
 ERROR:
 DONE:
+    if (!ret)
+    {
     FFMLOG_OC(@"%@(%ld) to enqueue a buffer with #%d packets, at %lf",
               ret? @"SUCCEED" : @"FAILED",
               err,
               buffer->mPacketDescriptionCount,
               bufStartTime.mSampleTime);
+    }
     
     return ret;
 }

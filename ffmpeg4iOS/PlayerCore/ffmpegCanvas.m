@@ -22,7 +22,7 @@
                          height:(float)height
 {
     CGRect frame = self.frame;
-    if (aspectRatio <= 0.f)
+    if (aspectRatio <= 0.f || isnan(aspectRatio))
     {
         frame.origin.x = 0.f;
         frame.origin.y = 0.f;

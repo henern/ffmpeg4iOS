@@ -262,6 +262,8 @@ ERROR:
                                                                       &fmt);
         CBRA(err == ERR_SUCCESS);
         CPRA(fmt);
+        
+        FFMLOG_OC(@"READY [format: %@]", fmt);
     }
     
     // detach

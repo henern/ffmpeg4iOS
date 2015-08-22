@@ -154,6 +154,8 @@ ERROR:
     audioFormat.mChannelsPerFrame = codec->channels;
     audioFormat.mBitsPerChannel = 0;
     
+    FFMLOG_OC(@"READY [format-ID: %lld]", (long)audioFormat.mFormatID);
+    
 ERROR:
     return ret;
 }

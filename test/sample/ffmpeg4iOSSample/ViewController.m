@@ -9,10 +9,18 @@
 #import "ViewController.h"
 #import <ffmpeg4iOS/ffmpegPlayerCore.h>
 
+// local test cases
 #define __RMVB_RV40_COOK__          0
 #define __MKV_H264_VORBIS__         0
 #define __MP4_H264_AACLOW__         0
+
+// online test cases
 #define __TS_H264_HEACC__           1
+#define __DMF_DX50_MP3__            0
+#define __WEBM_VP8_VORB__           0
+#define __3GP_H263_SAMR__           0
+#define __OGG_THEO_VORB__           0
+#define __FLV_FLV1_MP3__            0
 
 @interface ViewController ()
 {
@@ -50,7 +58,27 @@
     
 #if __TS_H264_HEACC__
     // online resource, may be expired
-    path = @"http://v.ku6.com/fetchwebm/FyuHwi0zd-I-YA5jtA4BWA...m3u8";
+    path = @"http://v.ku6.com/fetchwebm/ahl6SyvG-AUCIys8UlIcjg...m3u8";
+#endif
+    
+#if __DMF_DX50_MP3__
+    path = @"http://trailers.divx.com/divx_prod/profiles/Helicopter_DivXHT_ASP.divx";
+#endif
+    
+#if __WEBM_VP8_VORB__
+    path = @"http://techslides.com/demos/sample-videos/small.webm";
+#endif
+    
+#if __3GP_H263_SAMR__
+    path = @"http://techslides.com/demos/sample-videos/small.3gp";
+#endif
+    
+#if __OGG_THEO_VORB__
+    path = @"http://techslides.com/demos/sample-videos/small.ogv";
+#endif
+    
+#if __FLV_FLV1_MP3__
+    path = @"http://techslides.com/demos/sample-videos/small.flv";
 #endif
     
     screen = [[DEF_CLASS(ffmpegPlayerCore) alloc] initWithFrame:self.view.bounds
