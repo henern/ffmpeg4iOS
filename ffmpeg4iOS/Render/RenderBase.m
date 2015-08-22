@@ -133,7 +133,7 @@ ERROR:
     dispatch_async(dispatch_get_current_queue(), ^{
         
         // MUST signal the condition async, after status ==> PLAYING 
-        SIGNAL_CONDITION(m_signal_packet_available);
+        SIGNAL_CONDITION(self->m_signal_packet_available);
     });
     
     return YES;

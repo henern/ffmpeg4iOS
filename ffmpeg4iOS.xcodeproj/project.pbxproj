@@ -1411,6 +1411,7 @@
 		23CCC89E173E101B00EB8706 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				DSTROOT = /tmp/ffmpeg4iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ffmpeg4iOS/ffmpeg4iOS-Prefix.pch";
@@ -1428,6 +1429,7 @@
 					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/x86_64",
 					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/armv7",
 				);
+				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -1438,6 +1440,7 @@
 		23CCC89F173E101B00EB8706 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				DSTROOT = /tmp/ffmpeg4iOS.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ffmpeg4iOS/ffmpeg4iOS-Prefix.pch";
@@ -1455,6 +1458,7 @@
 					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/x86_64",
 					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/armv7",
 				);
+				OTHER_CFLAGS = "-DVERYIFY_API_KEY=1";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

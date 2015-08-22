@@ -8,6 +8,7 @@
 
 #import "ffmpegPlayerCore.h"
 #import "ehm.h"
+#import "ff_api.key"
 #import "libavcodec/avcodec.h"
 #import "libavdevice/avdevice.h"
 #import "libavformat/avio.h"
@@ -47,6 +48,9 @@
 + (void)initialize
 {
     [super initialize];
+    
+    // verify
+    CALL_FUNC(ff_verify_api_key)();
     
     // register ffmpeg once
     av_register_all();
