@@ -55,7 +55,9 @@
     
     screen = [[DEF_CLASS(ffmpegPlayerCore) alloc] initWithFrame:self.view.bounds
                                                            path:path
-                                                       autoPlay:YES];
+                                                       autoPlay:YES
+                                                     httpHeader:@"Refer: www.github.com/henern\r\n"
+                                                      userAgent:@"Mozilla/5.0 (iPhone; CPU iPhone OS 8_4 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12H141 Safari/600.1.4"];
     screen.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     screen.backgroundColor = [UIColor grayColor];
     [self.view addSubview:screen];

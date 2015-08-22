@@ -36,6 +36,9 @@
 @property (atomic, assign) float aspectRatio;   // = width / height
 @property (atomic, assign) BOOL userPause;
 
+@property (nonatomic, copy) NSString *m_httpHeader;
+@property (nonatomic, copy) NSString *m_userAgent;
+
 @end
 
 @implementation DEF_CLASS(ffmpegPlayerCore)
@@ -52,7 +55,11 @@
     avformat_network_init();
 }
 
-- (instancetype)initWithFrame:(CGRect)frame path:(NSString *)path4video autoPlay:(BOOL)isAutoPlay
+- (instancetype)initWithFrame:(CGRect)frame
+                         path:(NSString *)path4video
+                     autoPlay:(BOOL)isAutoPlay
+                   httpHeader:(NSString *)httpHeader
+                    userAgent:(NSString *)userAgent
 {
     VMAINTHREAD();
     
@@ -62,6 +69,9 @@
         VPR(path4video);
         self.m_path4video = path4video;
         self.userPause = !isAutoPlay;
+        
+        self.m_httpHeader = httpHeader;
+        self.m_userAgent = userAgent;
         
         m_canvas = [[DEF_CLASS(ffmpegCanvas) alloc] initWithFrame:self.bounds];
         [self addSubview:m_canvas];
@@ -170,15 +180,34 @@
     filename = [path UTF8String];
     CPRA(filename);
     
+    // prepare options
+    AVDictionary *format_opts = NULL;
+    if ([self.m_userAgent length] > 0)
+    {
+        av_dict_set(&format_opts, "user_agent", [self.m_userAgent cStringUsingEncoding:NSUTF8StringEncoding], 0);
+    }
+    if ([self.m_httpHeader length] > 0)
+    {
+        av_dict_set(&format_opts, "headers", [self.m_httpHeader cStringUsingEncoding:NSUTF8StringEncoding], 0);
+    }
+
     // open the video stream
+    AVDictionary **param_opts = format_opts? &format_opts : NULL;
 #ifdef _USE_DEPRECATED_FFMPEG_METHODS
     err = av_open_input_file(&avfContext, filename, NULL, 0, NULL);
 #else
-    err = avformat_open_input(&avfContext, filename, NULL, NULL);
+    err = avformat_open_input(&avfContext, filename, NULL, param_opts);
 #endif
     CBRA(err == ERR_SUCCESS);
     FFMLOG(@"Opened stream");
     
+    // free options
+    if (format_opts)
+    {
+        av_dict_free(&format_opts);
+        format_opts = NULL;
+    }
+        
     // find info
     err = avformat_find_stream_info(avfContext, NULL);
     CBRA(err >= ERR_SUCCESS);
