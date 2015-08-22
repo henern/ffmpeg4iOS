@@ -416,6 +416,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/../../ffmpeg4iphone-read-only/ffmpeg-libs/i386",
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = ffmpeg4iOSSample;
 				PROVISIONING_PROFILE = "";
