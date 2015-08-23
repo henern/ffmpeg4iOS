@@ -221,12 +221,13 @@ ERROR:
     CPRA(ctxCodec->extradata);
     CPRA(avc_fmt);
     
-    if ([self __extradataIsStream:ctxCodec->extradata size:ctxCodec->extradata_size])
+    // for more details, check https://developer.apple.com/videos/wwdc/2014/#513
+    if ([self __extradataIsNALU:ctxCodec->extradata size:ctxCodec->extradata_size])
     {
         // mark
         m_require_startcode2len = YES;
         
-        // stream ==> box
+        // nalu ==> avcC
         AVIOContext *pb = NULL;
         int err = avio_open_dyn_buf(&pb);
         CBRA(err == ERR_SUCCESS);
@@ -241,10 +242,10 @@ ERROR:
     CPRA(extradata);
     CBRA(extradata_size > 0);
     
-    ret = [self __extradataAsBox:extradata
-                            size:extradata_size
-                             sps:buf_SPS
-                             pps:buf_PPS];
+    ret = [self __extradataAsAVCC:extradata
+                             size:extradata_size
+                              sps:buf_SPS
+                              pps:buf_PPS];
     CBRA(ret);
     CBRA([buf_SPS length] > 0 && [buf_PPS length] > 0);
     
@@ -287,10 +288,10 @@ ERROR:
     return ret;
 }
 
-- (BOOL)__extradataAsBox:(uint8_t*)extradata
-                    size:(int32_t)extradata_size
-                     sps:(NSMutableData*)buf_SPS
-                     pps:(NSMutableData*)buf_PPS
+- (BOOL)__extradataAsAVCC:(uint8_t*)extradata
+                     size:(int32_t)extradata_size
+                      sps:(NSMutableData*)buf_SPS
+                      pps:(NSMutableData*)buf_PPS
 {
     BOOL ret = YES;
     
@@ -358,7 +359,7 @@ ERROR:
     return ret;
 }
 
-- (BOOL)__extradataIsStream:(const uint8_t*)extradata size:(int32_t)extradata_size
+- (BOOL)__extradataIsNALU:(const uint8_t*)extradata size:(int32_t)extradata_size
 {
     BOOL ret = NO;
     
