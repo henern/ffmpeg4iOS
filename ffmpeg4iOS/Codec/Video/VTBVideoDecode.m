@@ -13,11 +13,6 @@
 #import "VTBYUVBuffer.h"
 #import "libavformat/avc.h"
 
-typedef struct
-{
-    int64_t pts;
-}VTB_DECODE_FRAME_CONTEXT;
-
 @interface DEF_CLASS(VTBVideoDecode) ()
 {
     VTDecompressionSessionRef m_video_decode_session;
@@ -42,10 +37,12 @@ void vtb_video_decode_callback(void *decompressionOutputRefCon,
                                CMTime presentationTimeStamp,
                                CMTime presentationDuration )
 {
+    @autoreleasepool
+    {
     BOOL ret = YES;
     
-    VTB_DECODE_FRAME_CONTEXT *ctx_frame = (VTB_DECODE_FRAME_CONTEXT*)sourceFrameRefCon;
-    REF_CLASS(VTBVideoDecode) vtb = (__bridge REF_CLASS(VTBVideoDecode))decompressionOutputRefCon;
+    REF_CLASS(VTB_DECODE_FRAME_CONTEXT) ctx_frame = (__bridge_transfer REF_CLASS(VTB_DECODE_FRAME_CONTEXT))sourceFrameRefCon;
+    REF_CLASS(VTBVideoDecode) vtb = ctx_frame.vtb;
     REF_CLASS(VTBYUVBuffer) yuvBuf = nil;
     
     CPRA(ctx_frame);
@@ -55,7 +52,7 @@ void vtb_video_decode_callback(void *decompressionOutputRefCon,
     yuvBuf = [[DEF_CLASS(VTBYUVBuffer) alloc] init];
     CPRA(yuvBuf);
     
-    ret = [yuvBuf attach2imageBuf:imageBuffer pts:ctx_frame->pts];
+    ret = [yuvBuf attach2imageBuf:imageBuffer pts:ctx_frame.pts];
     CBRA(ret);
     
     // lock is not required here,
@@ -64,13 +61,9 @@ void vtb_video_decode_callback(void *decompressionOutputRefCon,
     CBRA(ret);
     
 ERROR:
-    if (ctx_frame)
-    {
-        free(ctx_frame);
-        ctx_frame = NULL;
-    }
     
     return;
+    }
 }
 
 @implementation DEF_CLASS(VTBVideoDecode)
@@ -112,7 +105,7 @@ ERROR:
     VTDecodeInfoFlags flag_decode_info = 0;
     CMSampleBufferRef sample_buf = NULL;
     REF_CLASS(VTBYUVBuffer) yuv = nil;
-    VTB_DECODE_FRAME_CONTEXT *ctxFrame = NULL;
+    REF_CLASS(VTB_DECODE_FRAME_CONTEXT) ctxFrame = nil;
     
     // callback config
     VTDecompressionOutputCallbackRecord callbackRec = {vtb_video_decode_callback, (__bridge void*)self};
@@ -155,17 +148,18 @@ ERROR:
     }
     CPRA(m_video_decode_session);
     
-    ctxFrame = malloc(sizeof(VTB_DECODE_FRAME_CONTEXT));
+    ctxFrame = [[DEF_CLASS(VTB_DECODE_FRAME_CONTEXT) alloc] init];
     CPRA(ctxFrame);
-    ctxFrame->pts = pkt->pts;
+    ctxFrame.pts = pkt->pts;
+    ctxFrame.vtb = self;
     
     err = VTDecompressionSessionDecodeFrame(m_video_decode_session,
                                             sample_buf,
-                                            0,
-                                            (void*)ctxFrame,
+                                            kVTDecodeFrame_EnableAsynchronousDecompression,
+                                            (__bridge_retained void*)ctxFrame,
                                             &flag_decode_info);
     // callback should free this
-    ctxFrame = NULL;
+    ctxFrame = nil;
     CBRA(err == ERR_SUCCESS);
     
     yuv = [self __popYUV];
@@ -179,12 +173,6 @@ ERROR:
     }
     
 ERROR:
-    if (ctxFrame)
-    {
-        free(ctxFrame);
-        ctxFrame = NULL;
-    }
-    
     if (sample_buf)
     {
         CFRelease(sample_buf);
@@ -482,27 +470,33 @@ ERROR:
 
 - (BOOL)__pushYUV:(REF_CLASS(VTBYUVBuffer))yuv
 {
-    if (yuv)
+    if (!yuv)
     {
-        VBR([m_pendingYUV count] == 0);     // suppose one buffer
-        [m_pendingYUV addObject:yuv];
-        return YES;
+        return NO;
     }
     
-    return NO;
+    @synchronized(self)
+    {
+        [m_pendingYUV addObject:yuv];
+    }
+    return YES;
 }
 
 - (REF_CLASS(VTBYUVBuffer))__popYUV
 {
-    REF_CLASS(VTBYUVBuffer) yuv = (REF_CLASS(VTBYUVBuffer))[m_pendingYUV firstObject];
+    REF_CLASS(VTBYUVBuffer) yuv = nil;
+    
+    @synchronized(self)
+    {
+    yuv = (REF_CLASS(VTBYUVBuffer))[m_pendingYUV firstObject];
     
     if (yuv)
     {
         [m_pendingYUV removeObjectAtIndex:0];
-        return yuv;
     }
-
-    return nil;
+    }
+    
+    return yuv;
 }
 
 - (void)cleanup
@@ -522,6 +516,14 @@ ERROR:
     
     [m_pendingYUV removeAllObjects];
     m_require_startcode2len = NO;
+}
+
+@end
+
+@implementation DEF_CLASS(VTB_DECODE_FRAME_CONTEXT)
+
+- (void)dealloc
+{
 }
 
 @end

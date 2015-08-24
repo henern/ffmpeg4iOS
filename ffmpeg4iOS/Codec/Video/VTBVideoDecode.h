@@ -11,3 +11,8 @@
 @interface DEF_CLASS(VTBVideoDecode) : DEF_CLASS(ffmpegVideoDecode)
 
 @end
+
+@interface DEF_CLASS(VTB_DECODE_FRAME_CONTEXT) : NSObject
+@property (nonatomic, assign) int64_t pts;
+@property (nonatomic, weak)   REF_CLASS(VTBVideoDecode) vtb;
+@end

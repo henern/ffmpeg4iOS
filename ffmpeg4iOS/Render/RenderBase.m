@@ -244,6 +244,12 @@ ERROR:
     // perf?
     err = [m_decoder decodePacket:pkt yuvBuffer:&yuvBuf codec:enc finished:&finished];
     CBR(err == ERR_SUCCESS);
+    
+    if (!finished)
+    {
+        // not finished yet, it's NOT error.
+        FINISH();
+    }
     CPRA(yuvBuf);
     
     // only supports YUV420P, 2VUY & NV12 now
@@ -257,6 +263,7 @@ ERROR:
         CBRA(ret);
     }
     
+DONE:
 ERROR:
     return ret;
 }
