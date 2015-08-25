@@ -10,15 +10,18 @@
 #import "ehm.h"
 #import "ffmpegVideoDecode+Factory.h"
 
+#define MAX_REORDERED_PKT_PTS       8
+#define MAX_PENDING_YUV_IN_QUEUE    MAX_REORDERED_PKT_PTS
+
 @interface DEF_CLASS(RenderBase) ()
 {
     NSThread *m_render_thread;
     double m_last_pts;
     
-    NSCondition *m_signal_packet_available;
     NSCondition *m_signal_thread_quit;
     
     REF_CLASS(ffmpegVideoDecode) m_decoder;
+    int32_t m_count4pendingYUVs;    // how many YUVs pending to draw
 }
 
 @end
@@ -28,7 +31,8 @@
 - (BOOL)drawYUV:(id<DEF_CLASS(YUVBuffer)>)yuvBuf enc:(AVCodecContext*)enc
 {
     VRENDERTHREAD();
-    return YES;
+    m_last_pts = [yuvBuf pts] * [self time_base];
+    return (m_last_pts >= 0.f);
 }
 
 - (BOOL)isInRenderThread
@@ -88,21 +92,6 @@ ERROR:
     return ret;
 }
 
-- (BOOL)appendPacket:(AVPacket *)pkt
-{
-    VHOSTTHREAD();
-    
-    BOOL ret = [super appendPacket:pkt];
-    CBRA(ret);
-    
-    // wake up __ffmpeg_rendering_thread
-    VPR(m_signal_packet_available);
-    SIGNAL_CONDITION(m_signal_packet_available);
-    
-ERROR:
-    return ret;
-}
-
 - (void)cleanup
 {
     [self __destroyRenderingThread];
@@ -130,12 +119,6 @@ ERROR:
 
 - (BOOL)doPlay
 {
-    dispatch_async(dispatch_get_current_queue(), ^{
-        
-        // MUST signal the condition async, after status ==> PLAYING 
-        SIGNAL_CONDITION(self->m_signal_packet_available);
-    });
-    
     return YES;
 }
 
@@ -150,14 +133,15 @@ ERROR:
     // priority
     [NSThread setThreadPriority:1];
     
-    VPR(m_signal_packet_available);
     VPR(m_signal_thread_quit);
     
     while (1)
     {
         @autoreleasepool
         {
-        WAIT_CONDITION(m_signal_packet_available);
+        NSDate *nearFuture = [NSDate dateWithTimeIntervalSinceNow:0.5f];
+        NSRunLoop *runloop = [NSRunLoop currentRunLoop];
+        [runloop runUntilDate:nearFuture];
         
         // one or more packets are available
         BOOL shouldQuit = NO;
@@ -191,6 +175,13 @@ ERROR:
     {
         @autoreleasepool
         {
+        // if there are too much pending YUV,
+        // we should not consume any more packet now, because of the memory issue.
+        if (m_count4pendingYUVs > MAX_PENDING_YUV_IN_QUEUE)
+        {
+            break;
+        }
+            
         AVPacket pkt = {0};
         AVPacket *top = [self topPacket];
         
@@ -297,28 +288,20 @@ ERROR:
     
     // delay since previous frame
     double delay = pts - m_last_pts;
-    if (delay > 0.f)
+    if (delay < 0.f)
     {
-        m_last_pts = pts;
+        // drop
+        FINISH();
     }
-    else
-    {
-        delay = 0.01f;
-    }
-    VBR(delay > 0.f);
     
     // sync with sync-core
     delay = [self delay4pts:pts delayInPlan:delay];
     
     // delay for this frame
-    if (delay > 0.f)
-    {
-        usleep(delay * MS_PER_SEC);
-    }
-    
-    ret = [self drawYUV:yuvBuf enc:enc];
+    ret = [self __delayDrawYUV:yuvBuf delay:delay];
     CBRA(ret);
     
+DONE:
 ERROR:
     return ret;
 }
@@ -329,8 +312,6 @@ ERROR:
     
     [self __destroyRenderingThread];
     
-    m_signal_packet_available = [[NSCondition alloc] init];
-    VPR(m_signal_packet_available);
     m_signal_thread_quit = [[NSCondition alloc] init];
     VPR(m_signal_thread_quit);
     
@@ -363,10 +344,56 @@ ERROR:
     }
     
     m_signal_thread_quit = nil;
-    m_signal_packet_available = nil;
     
     m_render_thread = NULL;
     m_last_pts = AV_NOPTS_VALUE;
+}
+
+- (BOOL)__delayDrawYUV:(id<DEF_CLASS(YUVBuffer)>)yuvBuf delay:(double)delayInSec
+{
+    VRENDERTHREAD();
+    
+    BOOL ret = YES;
+    
+    m_count4pendingYUVs++;
+    
+    double threshold = 1.5f / av_q2d([self ctx_codec]->framerate);
+    
+    if (delayInSec > threshold)
+    {
+        [self performSelector:@selector(__impl_delayDrawYUV:)
+                   withObject:yuvBuf
+                   afterDelay:delayInSec];
+        
+        FINISH();
+    }
+    else if (delayInSec > 0.f)
+    {
+        usleep(delayInSec * MS_PER_SEC);
+    }
+    
+    ret = [self __impl_delayDrawYUV:yuvBuf];
+    CBRA(ret);
+    
+DONE:
+ERROR:
+    return ret;
+}
+
+- (BOOL)__impl_delayDrawYUV:(id<DEF_CLASS(YUVBuffer)>)yuvBuf
+{
+    VRENDERTHREAD();
+    
+    m_count4pendingYUVs--;
+    VBR(m_count4pendingYUVs >= 0);
+    
+    AVCodecContext *enc = [self ctx_codec];
+    
+    BOOL ret = [self drawYUV:yuvBuf enc:enc];
+    CBRA(ret);
+    
+ERROR:
+    return ret;
 }
 
 #define AV_PKT_FLAG_QUIT        0x8000

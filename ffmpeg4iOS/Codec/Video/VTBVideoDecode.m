@@ -153,9 +153,10 @@ ERROR:
     ctxFrame.pts = pkt->pts;
     ctxFrame.vtb = self;
     
+    // synchronous, read RenderBase for more details.
     err = VTDecompressionSessionDecodeFrame(m_video_decode_session,
                                             sample_buf,
-                                            kVTDecodeFrame_EnableAsynchronousDecompression,
+                                            0,
                                             (__bridge_retained void*)ctxFrame,
                                             &flag_decode_info);
     // callback should free this
