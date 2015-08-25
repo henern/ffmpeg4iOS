@@ -50,7 +50,7 @@
     CPRA(m_bufYUV);
     
     err = [m_bufYUV attach2frame:avfDecoded fmt:ctxCodec->pix_fmt];
-    CBRA(err == ERR_SUCCESS);
+    CBR(err == ERR_SUCCESS);
     
     *yuvBuffer = m_bufYUV;
     

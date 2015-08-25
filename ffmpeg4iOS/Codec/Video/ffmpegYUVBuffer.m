@@ -51,7 +51,10 @@
     CPRA(avpicYUV);
     CPRA(avfDecoded);
     CBRA(fmt == AV_PIX_FMT_YUV420P || fmt == AV_PIX_FMT_NV12);
-    CBRA(m_width > 0 && m_height > 0);
+    
+    m_width = avfDecoded->width;
+    m_height = avfDecoded->height;
+    CBR(m_width > 0 && m_height > 0);
     
     // buffer is re-usable
     if (!m_bufferYUV)

@@ -284,6 +284,13 @@
         // recv the packet from ffmpeg
         [self __sync_readPacket4context:avfContext render:render_engine audio:audio_engine];
         
+        // aspect-ratio may change
+        if ([render_engine aspectRatio] != self.aspectRatio)
+        {
+            self.aspectRatio = [render_engine aspectRatio];
+            [self __force_relayout];
+        }
+            
         // play or pause?
         if (self.userPause)
         {

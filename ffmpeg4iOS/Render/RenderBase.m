@@ -146,7 +146,6 @@ ERROR:
         // one or more packets are available
         BOOL shouldQuit = NO;
         BOOL ret = [self __handlePacketsIfQuit:&shouldQuit];
-        VBR(ret);
         UNUSE(ret);
         
         if (shouldQuit)
@@ -384,6 +383,15 @@ ERROR:
 {
     VRENDERTHREAD();
     
+    // aspect may be different from the one in codec
+    VBR([yuvBuf width] > 0 && [yuvBuf height] > 0);
+    float frame_aspect = 1.0 * [yuvBuf width] / [yuvBuf height];
+    if (frame_aspect != self.aspectRatio)
+    {
+        self.aspectRatio = frame_aspect;
+    }
+    
+    // count the pending YUV
     m_count4pendingYUVs--;
     VBR(m_count4pendingYUVs >= 0);
     
