@@ -13,6 +13,8 @@
 #import "VTBYUVBuffer.h"
 #import "libavformat/avc.h"
 
+#define MAX_DELAYED_PIC         8
+
 @interface DEF_CLASS(VTBVideoDecode) ()
 {
     VTDecompressionSessionRef m_video_decode_session;
@@ -21,6 +23,7 @@
     NSMutableArray *m_pendingYUV;
     
     BOOL m_require_startcode2len;
+    int m_count4delayedPic;
 }
 
 - (BOOL)__pushYUV:(REF_CLASS(VTBYUVBuffer))yuv;
@@ -192,6 +195,11 @@ ERROR:
     return err;
 }
 
+- (int)count4pendingYUVBuffers
+{
+    return (int)[m_pendingYUV count];
+}
+
 #pragma mark private
 - (BOOL)__avcConfig4codec:(AVCodecContext*)ctxCodec
                   avc_fmt:(CMFormatDescriptionRef*)avc_fmt
@@ -209,6 +217,9 @@ ERROR:
     CPRA(ctxCodec);
     CPRA(ctxCodec->extradata);
     CPRA(avc_fmt);
+    
+    m_count4delayedPic = ctxCodec->has_b_frames;
+    CBRA(0 <= m_count4delayedPic && m_count4delayedPic < MAX_DELAYED_PIC);
     
     // for more details, check https://developer.apple.com/videos/wwdc/2014/#513
     if ([self __extradataIsNALU:ctxCodec->extradata size:ctxCodec->extradata_size])
@@ -489,14 +500,30 @@ ERROR:
     
     @synchronized(self)
     {
-    yuv = (REF_CLASS(VTBYUVBuffer))[m_pendingYUV firstObject];
+        if ([m_pendingYUV count] < m_count4delayedPic)
+        {
+            FINISH();
+        }
+        
+        yuv = (REF_CLASS(VTBYUVBuffer))[m_pendingYUV firstObject];
     
-    if (yuv)
-    {
-        [m_pendingYUV removeObjectAtIndex:0];
-    }
+        for (REF_CLASS(VTBYUVBuffer) iter in m_pendingYUV)
+        {
+            CCBR(iter != yuv);
+            
+            if ([iter pts] < [yuv pts])
+            {
+                yuv = iter;
+            }
+        }
+        
+        if (yuv)
+        {
+            [m_pendingYUV removeObject:yuv];
+        }
     }
     
+DONE:
     return yuv;
 }
 

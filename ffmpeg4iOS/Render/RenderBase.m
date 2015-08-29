@@ -21,7 +21,6 @@
     NSCondition *m_signal_thread_quit;
     
     REF_CLASS(ffmpegVideoDecode) m_decoder;
-    int32_t m_count4pendingYUVs;    // how many YUVs pending to draw
 }
 
 @end
@@ -176,7 +175,7 @@ ERROR:
         {
         // if there are too much pending YUV,
         // we should not consume any more packet now, because of the memory issue.
-        if (m_count4pendingYUVs > MAX_PENDING_YUV_IN_QUEUE)
+        if ([m_decoder count4pendingYUVBuffers] > MAX_PENDING_YUV_IN_QUEUE)
         {
             break;
         }
@@ -354,19 +353,7 @@ ERROR:
     
     BOOL ret = YES;
     
-    m_count4pendingYUVs++;
-    
-    double threshold = 1.5f / av_q2d([self ctx_codec]->framerate);
-    
-    if (delayInSec > threshold)
-    {
-        [self performSelector:@selector(__impl_delayDrawYUV:)
-                   withObject:yuvBuf
-                   afterDelay:delayInSec];
-        
-        FINISH();
-    }
-    else if (delayInSec > 0.f)
+    if (delayInSec > 0.f)
     {
         usleep(delayInSec * MS_PER_SEC);
     }
@@ -390,10 +377,6 @@ ERROR:
     {
         self.aspectRatio = frame_aspect;
     }
-    
-    // count the pending YUV
-    m_count4pendingYUVs--;
-    VBR(m_count4pendingYUVs >= 0);
     
     AVCodecContext *enc = [self ctx_codec];
     

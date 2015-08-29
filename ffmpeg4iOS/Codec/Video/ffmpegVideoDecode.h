@@ -19,4 +19,6 @@
               codec:(AVCodecContext*)ctxCodec
            finished:(int*)finished;
 
+- (int)count4pendingYUVBuffers;
+
 @end

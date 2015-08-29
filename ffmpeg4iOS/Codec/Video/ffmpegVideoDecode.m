@@ -69,4 +69,9 @@ ERROR:
     return err;
 }
 
+- (int)count4pendingYUVBuffers
+{
+    return 0;
+}
+
 @end
