@@ -322,7 +322,7 @@ ERROR:
     [m_render_thread start];
     
     // now ready
-    AVSE_STATUS_UNSET(AVSTREAM_ENGINE_STATUS_PREPARE);
+    AVSE_STATUS_SET(AVSTREAM_ENGINE_STATUS_PREPARE);
     
     return [m_render_thread isExecuting];
 }

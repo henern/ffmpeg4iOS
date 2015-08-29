@@ -10,6 +10,10 @@
 #import "ehm.h"
 #import "ffmpegPlayerCore.h"
 
+#define KVO_STATE           @"state"
+#define KVO_DURATION        @"duration"
+#define KVO_POS             @"position"
+
 NSString * const CyberPlayerLoadDidPreparedNotification             = @"CyberPlayerLoadDidPreparedNotification";
 NSString * const CyberPlayerPlaybackDidFinishNotification           = @"CyberPlayerPlaybackDidFinishNotification";
 NSString * const CyberPlayerStartCachingNotification                = @"CyberPlayerStartCachingNotification";
@@ -23,6 +27,8 @@ NSString * const CyberPlayerGotNetworkBitrateNotification           = @"CyberPla
 @interface CyberPlayerController ()
 {
     REF_CLASS(ffmpegPlayerCore) m_playbackCore;
+    
+    FFMPEGPLAYERCORE_STATE m_state4core;
 }
 
 @property (nonatomic, copy) NSString *userAgent;
@@ -68,9 +74,16 @@ NSString * const CyberPlayerGotNetworkBitrateNotification           = @"CyberPla
     return self;
 }
 
+- (void)dealloc
+{
+    [self stop];
+}
+
 #pragma mark url
 - (void)setContentString:(NSString *)contentString
 {
+    VMAINTHREAD();
+    
     self.contentURL = nil;
     
     _contentString = [contentString copy];
@@ -100,7 +113,23 @@ NSString * const CyberPlayerGotNetworkBitrateNotification           = @"CyberPla
     m_playbackCore.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     CPRA(m_playbackCore);
     
+    // add KVOs
+    [m_playbackCore addObserver:self
+                     forKeyPath:KVO_STATE
+                        options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionInitial)
+                        context:nil];
+    [m_playbackCore addObserver:self
+                     forKeyPath:KVO_DURATION
+                        options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionInitial)
+                        context:nil];
+    [m_playbackCore addObserver:self
+                     forKeyPath:KVO_POS
+                        options:(NSKeyValueObservingOptionNew | NSKeyValueObservingOptionInitial)
+                        context:nil];
+    
     [self.view addSubview:m_playbackCore];
+    
+    m_state4core = m_playbackCore.state;
     
 ERROR:
     return;
@@ -113,14 +142,24 @@ ERROR:
 
 - (void)play
 {
+    VMAINTHREAD();
     [m_playbackCore play];
 }
 
 - (void)stop
 {
+    VMAINTHREAD();
+    
     if (m_playbackCore)
     {
         [self pause];
+        
+        // remove all KVOs
+        [m_playbackCore removeObserver:self forKeyPath:KVO_STATE];
+        [m_playbackCore removeObserver:self forKeyPath:KVO_DURATION];
+        [m_playbackCore removeObserver:self forKeyPath:KVO_POS];
+        
+        [m_playbackCore destroy];
         
         [m_playbackCore removeFromSuperview];
         m_playbackCore = nil;
@@ -129,11 +168,13 @@ ERROR:
 
 - (void)pause
 {
+    VMAINTHREAD();
     [m_playbackCore pause];
 }
 
 - (void)seekTo:(NSTimeInterval)newPos
 {
+    VMAINTHREAD();
     VPR(m_playbackCore);
     [m_playbackCore seekTo:newPos];
 }
@@ -158,17 +199,30 @@ ERROR:
 
 - (BOOL)isPreparedToPlay
 {
-    return m_playbackCore != nil;
+    VMAINTHREAD();
+    return (m_playbackCore.state & FFMPEGPLAYERCORE_STATE_READY) != 0;
 }
 
 - (CBPMoviePlaybackState)playbackState
 {
-    if (m_playbackCore)
+    VMAINTHREAD();
+    
+    if (![self isPreparedToPlay])
     {
-        return CBPMoviePlaybackStatePlaying;
+        return CBPMoviePlaybackStateStopped;
     }
     
-    return CBPMoviePlaybackStateStopped;
+    if (m_playbackCore.state & FFMPEGPLAYERCORE_STATE_ERROR)
+    {
+        return CBPMoviePlaybackStateInterrupted;
+    }
+    
+    if (m_playbackCore.state & FFMPEGPLAYERCORE_STATE_PAUSED_BY_USER)
+    {
+        return CBPMoviePlaybackStatePaused;
+    }
+    
+    return CBPMoviePlaybackStatePlaying;
 }
 
 - (float)downloadSpeed
@@ -185,19 +239,20 @@ ERROR:
 
 - (int)videoWidth
 {
-    VNOIMPL();
-    return 0;
+    VMAINTHREAD();
+    return m_playbackCore.width4video;
 }
 
 - (int)videoHeight
 {
-    VNOIMPL();
-    return 0;
+    VMAINTHREAD();
+    return m_playbackCore.height4video;
 }
 
 - (NSString *)getSDKVersion
 {
-    return @"0.1.0";
+    VMAINTHREAD();
+    return m_playbackCore.version;
 }
 
 - (void)setParametKey:(NSString*)parametKey
@@ -239,6 +294,57 @@ ERROR:
 - (int)openExtSubtitleFile:(NSString*)subFilePath
 {
     VNOIMPL();
+}
+
+#pragma mark KVOs
+- (void)observeValueForKeyPath:(NSString *)keyPath
+                      ofObject:(id)object
+                        change:(NSDictionary *)change
+                       context:(void *)context
+{
+    VMAINTHREAD();
+    
+    if ([keyPath isEqualToString:KVO_STATE])
+    {
+        [self __handleStateChanged:change];
+    }
+    else if ([keyPath isEqualToString:KVO_DURATION])
+    {
+        [self __handleDurationChanged:change];
+    }
+    else if ([keyPath isEqualToString:KVO_POS])
+    {
+        [self __handlePositionChanged:change];
+    }
+    else
+    {
+        [super observeValueForKeyPath:keyPath
+                             ofObject:object
+                               change:change
+                              context:context];
+    }
+}
+
+- (void)__handleStateChanged:(NSDictionary*)change
+{
+    if ([self isPreparedToPlay] &&
+        (m_state4core & FFMPEGPLAYERCORE_STATE_READY) == 0)
+    {
+        [[NSNotificationCenter defaultCenter] postNotificationName:CyberPlayerLoadDidPreparedNotification
+                                                            object:self];
+    }
+    
+    m_state4core = m_playbackCore.state;
+}
+
+- (void)__handleDurationChanged:(NSDictionary*)change
+{
+    // nothing yet
+}
+
+- (void)__handlePositionChanged:(NSDictionary*)change
+{
+    self.currentPlaybackTime = m_playbackCore.position;
 }
 
 @end

@@ -31,6 +31,7 @@
 - (void)dealloc
 {
     [self cleanup];
+    FFMLOG_OC(@"%@ already destroyed.", [self class]);
 }
 
 - (void)cleanup

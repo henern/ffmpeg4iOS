@@ -20,20 +20,23 @@
 
 #define DEFAULT_STREAM          (-1)
 
+#define FFMPC_STATE_SET(x)      (self.state |= (x))
+#define FFMPC_STATE_UNSET(x)    (self.state &= ~(x))
+
 @interface DEF_CLASS(ffmpegPlayerCore) ()
 {
     BOOL m_shouldSeek;
     float m_pendingSeekTo;
     
     REF_CLASS(ffmpegCanvas) m_canvas;
+    
+    BOOL m_active;
 }
 
 @property (nonatomic, strong) NSThread *m_ffmpegQueue;
 @property (nonatomic, copy) NSString *m_path4video;
 @property (nonatomic, strong) NSError *m_err;
 
-@property (atomic, assign) double duration;
-@property (atomic, assign) double position;
 @property (atomic, assign) float aspectRatio;   // = width / height
 @property (atomic, assign) BOOL userPause;
 
@@ -93,6 +96,9 @@
     [m_canvas relayoutWithAspectRatio:self.aspectRatio
                                 width:self.frame.size.width
                                height:self.frame.size.height];
+    
+    self.width4video = m_canvas.frame.size.width;
+    self.height4video = m_canvas.frame.size.height;
 }
 
 - (void)dealloc
@@ -106,20 +112,37 @@
     
     [self __cleanup];
     
+    m_active = YES;
+    
     self.m_ffmpegQueue = [[NSThread alloc] initWithTarget:self
                                                  selector:@selector(__ffmpeg_packet_thread:)
                                                    object:self.m_path4video];
     self.m_ffmpegQueue.name = [NSString stringWithFormat:@"ffmpeg4iOS.%@.Q.packet", [self class]];
     [self.m_ffmpegQueue start];
+    
+    FFMPC_STATE_SET(FFMPEGPLAYERCORE_STATE_INIT);
 }
 
 - (void)__cleanup
 {
+    m_active = NO;
+    self.state = FFMPEGPLAYERCORE_STATE_UNKNOWN;
+    
     [self.m_ffmpegQueue cancel];
     self.m_ffmpegQueue = nil;
 }
 
 #pragma mark public
+- (NSString*)version
+{
+    return FFMPEG4IOS_VER;
+}
+
+- (NSError*)error
+{
+    return self.m_err;
+}
+
 - (NSString*)path
 {
     return self.m_path4video;
@@ -136,6 +159,7 @@
     VMAINTHREAD();
     
     self.userPause = NO;
+    FFMPC_STATE_UNSET(FFMPEGPLAYERCORE_STATE_PAUSED_BY_USER);
 }
 
 - (void)pause
@@ -143,6 +167,7 @@
     VMAINTHREAD();
     
     self.userPause = YES;
+    FFMPC_STATE_SET(FFMPEGPLAYERCORE_STATE_PAUSED_BY_USER);
 }
 
 - (void)seekTo:(double)pos
@@ -152,6 +177,11 @@
     FFMLOG_OC(@"try to seek to %lf", pos);
     m_pendingSeekTo = pos;
     m_shouldSeek = YES;
+}
+
+- (void)destroy
+{
+    [self __cleanup];
 }
 
 #pragma mark loop
@@ -205,6 +235,11 @@
     CBRA(err == ERR_SUCCESS);
     FFMLOG(@"Opened stream");
     
+    // update state
+    BEGIN_RUN_IN_MAIN();
+        FFMPC_STATE_SET(FFMPEGPLAYERCORE_STATE_READY);
+    END_RUN_IN_MAIN();
+        
     // free options
     if (format_opts)
     {
@@ -219,9 +254,11 @@
     
     // duration
     CBRA(avfContext->duration > 0);
+    BEGIN_RUN_IN_MAIN();
     self.duration = avfContext->duration * 1.0f / AV_TIME_BASE;
     self.position = 0.f;
     FFMLOG_OC(@"[%@] duration is %lf", path, self.duration);
+    END_RUN_IN_MAIN();
     
     // go through each streams
     for(int i = 0; i < avfContext->nb_streams; i++)
@@ -252,7 +289,7 @@
     [self __force_relayout];
     
     // loop to consume the packets
-    while (1)
+    while (m_active)
     {
         @autoreleasepool
         {
@@ -304,7 +341,10 @@
         }
         
         // FIXME: need to figure out where is good to update the position
-        self.position = [syncCore timestamp];
+        double pos = [syncCore timestamp];
+        BEGIN_RUN_IN_MAIN();
+            self.position = pos;
+        END_RUN_IN_MAIN();
             
         }
     }
@@ -316,12 +356,18 @@ ERROR:
     }
     
 DONE:
+    // cleanup before close the context
+    [render_engine cleanup];
+    [audio_engine cleanup];
+        
     if (avfContext)
     {
         avformat_close_input(&avfContext);
         avfContext = NULL;
     }
     }
+    
+    FFMLOG_OC(@"%@ quits.", [NSThread currentThread].name);
     
     return;
 }

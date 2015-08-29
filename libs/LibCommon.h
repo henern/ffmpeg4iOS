@@ -40,4 +40,13 @@
 #define WAIT_CONDITION_BEGIN(c) [(c) lock]
 #define WAIT_CONDITION_END(c)   [(c) wait];[(c) unlock]
 
+// dispatch
+#define BEGIN_RUN_IN_MAIN()                             \
+    {                                                   \
+    dispatch_async(dispatch_get_main_queue(), ^{        \
+    while(0){}
+#define END_RUN_IN_MAIN()                               \
+    });                                                 \
+    }
+
 #endif

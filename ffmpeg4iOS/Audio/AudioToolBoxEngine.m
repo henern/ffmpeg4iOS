@@ -106,6 +106,9 @@ ERROR:
     ret = [m_decoder description:&audioFormat codec:codec forStream:stream];
     CBRA(ret);
     
+    // update the flag
+    self.stoppingQueue = NO;
+    
     // launch the queue and callback
     err = AudioQueueNewOutput(&audioFormat,
                               ffmpeg_audioQueueOutputCallback,
@@ -321,6 +324,7 @@ ERROR:
         m_audioBuffers[i] = NULL;
     }
 
+    self.stoppingQueue = YES;
     AudioQueueDispose(m_audioQueue, YES);
     m_audioQueue = NULL;
     
