@@ -31,6 +31,15 @@
 		23D56F211B774D4600E1F32D /* libpostproc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D56F191B774D4600E1F32D /* libpostproc.a */; };
 		23D56F221B774D4600E1F32D /* libswresample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D56F1A1B774D4600E1F32D /* libswresample.a */; };
 		23D56F231B774D4600E1F32D /* libswscale.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D56F1B1B774D4600E1F32D /* libswscale.a */; };
+		23D877971B909B140001DD22 /* CyberPlayerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 23D877961B909B140001DD22 /* CyberPlayerController.m */; };
+		23D877AC1B90B13A0001DD22 /* libavcodec-arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D877A41B90B13A0001DD22 /* libavcodec-arm64.a */; };
+		23D877AD1B90B13A0001DD22 /* libavdevice-arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D877A51B90B13A0001DD22 /* libavdevice-arm64.a */; };
+		23D877AE1B90B13A0001DD22 /* libavfilter-arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D877A61B90B13A0001DD22 /* libavfilter-arm64.a */; };
+		23D877AF1B90B13A0001DD22 /* libavformat-arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D877A71B90B13A0001DD22 /* libavformat-arm64.a */; };
+		23D877B01B90B13A0001DD22 /* libavutil-arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D877A81B90B13A0001DD22 /* libavutil-arm64.a */; };
+		23D877B11B90B13A0001DD22 /* libpostproc-arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D877A91B90B13A0001DD22 /* libpostproc-arm64.a */; };
+		23D877B21B90B13A0001DD22 /* libswresample-arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D877AA1B90B13A0001DD22 /* libswresample-arm64.a */; };
+		23D877B31B90B13A0001DD22 /* libswscale-arm64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23D877AB1B90B13A0001DD22 /* libswscale-arm64.a */; };
 		23F72A5B1B6286B900FC7F3A /* libavcodec-x86_64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23F72A531B6286B900FC7F3A /* libavcodec-x86_64.a */; };
 		23F72A5C1B6286B900FC7F3A /* libavdevice-x86_64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23F72A541B6286B900FC7F3A /* libavdevice-x86_64.a */; };
 		23F72A5D1B6286B900FC7F3A /* libavfilter-x86_64.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23F72A551B6286B900FC7F3A /* libavfilter-x86_64.a */; };
@@ -503,6 +512,15 @@
 		23D56F191B774D4600E1F32D /* libpostproc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libpostproc.a; sourceTree = "<group>"; };
 		23D56F1A1B774D4600E1F32D /* libswresample.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswresample.a; sourceTree = "<group>"; };
 		23D56F1B1B774D4600E1F32D /* libswscale.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libswscale.a; sourceTree = "<group>"; };
+		23D877961B909B140001DD22 /* CyberPlayerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CyberPlayerController.m; sourceTree = "<group>"; };
+		23D877A41B90B13A0001DD22 /* libavcodec-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libavcodec-arm64.a"; sourceTree = "<group>"; };
+		23D877A51B90B13A0001DD22 /* libavdevice-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libavdevice-arm64.a"; sourceTree = "<group>"; };
+		23D877A61B90B13A0001DD22 /* libavfilter-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libavfilter-arm64.a"; sourceTree = "<group>"; };
+		23D877A71B90B13A0001DD22 /* libavformat-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libavformat-arm64.a"; sourceTree = "<group>"; };
+		23D877A81B90B13A0001DD22 /* libavutil-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libavutil-arm64.a"; sourceTree = "<group>"; };
+		23D877A91B90B13A0001DD22 /* libpostproc-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libpostproc-arm64.a"; sourceTree = "<group>"; };
+		23D877AA1B90B13A0001DD22 /* libswresample-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libswresample-arm64.a"; sourceTree = "<group>"; };
+		23D877AB1B90B13A0001DD22 /* libswscale-arm64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libswscale-arm64.a"; sourceTree = "<group>"; };
 		23F72A531B6286B900FC7F3A /* libavcodec-x86_64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libavcodec-x86_64.a"; sourceTree = "<group>"; };
 		23F72A541B6286B900FC7F3A /* libavdevice-x86_64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libavdevice-x86_64.a"; sourceTree = "<group>"; };
 		23F72A551B6286B900FC7F3A /* libavfilter-x86_64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = "libavfilter-x86_64.a"; sourceTree = "<group>"; };
@@ -568,16 +586,24 @@
 				23D56F201B774D4600E1F32D /* libavutil.a in Frameworks */,
 				23F72A5E1B6286B900FC7F3A /* libavformat-x86_64.a in Frameworks */,
 				23F72A621B6286B900FC7F3A /* libswscale-x86_64.a in Frameworks */,
+				23D877AF1B90B13A0001DD22 /* libavformat-arm64.a in Frameworks */,
 				23D56F211B774D4600E1F32D /* libpostproc.a in Frameworks */,
 				23D56F221B774D4600E1F32D /* libswresample.a in Frameworks */,
+				23D877B11B90B13A0001DD22 /* libpostproc-arm64.a in Frameworks */,
 				23F72A5D1B6286B900FC7F3A /* libavfilter-x86_64.a in Frameworks */,
 				23D56F1F1B774D4600E1F32D /* libavformat.a in Frameworks */,
+				23D877B21B90B13A0001DD22 /* libswresample-arm64.a in Frameworks */,
 				23F72A5F1B6286B900FC7F3A /* libavutil-x86_64.a in Frameworks */,
 				23D56F231B774D4600E1F32D /* libswscale.a in Frameworks */,
+				23D877AE1B90B13A0001DD22 /* libavfilter-arm64.a in Frameworks */,
+				23D877B31B90B13A0001DD22 /* libswscale-arm64.a in Frameworks */,
 				23D56F1C1B774D4600E1F32D /* libavcodec.a in Frameworks */,
 				23D56F1D1B774D4600E1F32D /* libavdevice.a in Frameworks */,
 				23F72A601B6286B900FC7F3A /* libpostproc-x86_64.a in Frameworks */,
+				23D877AC1B90B13A0001DD22 /* libavcodec-arm64.a in Frameworks */,
+				23D877B01B90B13A0001DD22 /* libavutil-arm64.a in Frameworks */,
 				23F72A611B6286B900FC7F3A /* libswresample-x86_64.a in Frameworks */,
+				23D877AD1B90B13A0001DD22 /* libavdevice-arm64.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -610,6 +636,7 @@
 		2374A8771B4934C10069CE94 /* CyberPlayer */ = {
 			isa = PBXGroup;
 			children = (
+				23D877961B909B140001DD22 /* CyberPlayerController.m */,
 				2374A8781B4934C10069CE94 /* CyberPlayerController.h */,
 			);
 			path = CyberPlayer;
@@ -1156,6 +1183,7 @@
 		23CCCA3C173E41B600EB8706 /* ffmpeg-libs */ = {
 			isa = PBXGroup;
 			children = (
+				23D877A31B90B13A0001DD22 /* arm64 */,
 				23D56F131B774D4600E1F32D /* armv7 */,
 				23F72A521B6286B900FC7F3A /* x86_64 */,
 			);
@@ -1175,6 +1203,21 @@
 				23D56F1B1B774D4600E1F32D /* libswscale.a */,
 			);
 			path = armv7;
+			sourceTree = "<group>";
+		};
+		23D877A31B90B13A0001DD22 /* arm64 */ = {
+			isa = PBXGroup;
+			children = (
+				23D877A41B90B13A0001DD22 /* libavcodec-arm64.a */,
+				23D877A51B90B13A0001DD22 /* libavdevice-arm64.a */,
+				23D877A61B90B13A0001DD22 /* libavfilter-arm64.a */,
+				23D877A71B90B13A0001DD22 /* libavformat-arm64.a */,
+				23D877A81B90B13A0001DD22 /* libavutil-arm64.a */,
+				23D877A91B90B13A0001DD22 /* libpostproc-arm64.a */,
+				23D877AA1B90B13A0001DD22 /* libswresample-arm64.a */,
+				23D877AB1B90B13A0001DD22 /* libswscale-arm64.a */,
+			);
+			path = arm64;
 			sourceTree = "<group>";
 		};
 		23F72A521B6286B900FC7F3A /* x86_64 */ = {
@@ -1345,6 +1388,7 @@
 				23F72A881B6286D400FC7F3A /* RenderBase+Factory.m in Sources */,
 				23F72A871B6286D400FC7F3A /* OpenGLRender.m in Sources */,
 				232F11431B76740E0033F4BC /* ffmpegAudioDecode.m in Sources */,
+				23D877971B909B140001DD22 /* CyberPlayerController.m in Sources */,
 				237B04B81B6E195700226EEF /* Utility.m in Sources */,
 				23F72A991B636C2500FC7F3A /* ThreadSafeDebug.m in Sources */,
 				237B04B21B6D367F00226EEF /* ffmpegVideoDecode+Factory.m in Sources */,
@@ -1428,6 +1472,7 @@
 					"\"$(SRCROOT)/ffmpeg4iphone-read-only/ffmpeg-libs/armv7\"",
 					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/x86_64",
 					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/armv7",
+					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/arm64",
 				);
 				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "-ObjC";
@@ -1457,6 +1502,7 @@
 					"\"$(SRCROOT)/ffmpeg4iphone-read-only/ffmpeg-libs/armv7\"",
 					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/x86_64",
 					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/armv7",
+					"$(PROJECT_DIR)/ffmpeg4iphone-read-only/ffmpeg-libs/arm64",
 				);
 				OTHER_CFLAGS = "-DVERYIFY_API_KEY=1";
 				OTHER_LDFLAGS = "-ObjC";
