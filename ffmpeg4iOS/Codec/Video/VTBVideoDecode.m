@@ -49,7 +49,7 @@ void vtb_video_decode_callback(void *decompressionOutputRefCon,
     REF_CLASS(VTBYUVBuffer) yuvBuf = nil;
     
     CPRA(ctx_frame);
-    CPRA(imageBuffer);
+    CPR(imageBuffer);
     CBRA([vtb isKindOfClass:[DEF_CLASS(VTBVideoDecode) class]]);
     
     yuvBuf = [[DEF_CLASS(VTBYUVBuffer) alloc] init];
@@ -164,7 +164,7 @@ ERROR:
                                             &flag_decode_info);
     // callback should free this
     ctxFrame = nil;
-    CBRA(err == ERR_SUCCESS);
+    CBR(err == ERR_SUCCESS);
     
     yuv = [self __popYUV];
     if ([yuv isReady])
