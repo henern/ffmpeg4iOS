@@ -47,7 +47,8 @@
     
     if (indx_pkt_in_buf == 0)
     {
-        bufStartTime.mSampleTime = pkt.pts;
+        // mSampleTime = pts is not accurate enough, let's use seconds instead of pure pts
+        bufStartTime.mSampleTime = pkt.pts * time_base * ctx_codec->sample_rate;
         bufStartTime.mFlags = kAudioTimeStampSampleTimeValid;
     }
     
