@@ -69,6 +69,9 @@ struct segment {
     int64_t duration;
     int64_t url_offset;
     int64_t size;
+    
+    int64_t seg_pts_base;    // pts-base per DISCONTINUITY
+    
     char *url;
     char *key;
     enum KeyType key_type;
@@ -183,6 +186,8 @@ typedef struct HLSContext {
     char *cookies;                       ///< holds HTTP cookie values set in either the initial response or as an AVOption to the HTTP protocol context
     char *headers;                       ///< holds HTTP headers set as an AVOption to the HTTP protocol context
 } HLSContext;
+
+static AVRational get_timebase(struct playlist *pls);
 
 static int read_chomp_line(AVIOContext *s, char *buf, int maxlen)
 {
@@ -499,6 +504,8 @@ static int parse_playlist(HLSContext *c, const char *url,
 {
     int ret = 0, is_segment = 0, is_variant = 0;
     int64_t duration = 0;
+	int64_t discontinuity_seg_pts = 0;
+	int64_t pls_duration = 0;
     enum KeyType key_type = KEY_NONE;
     uint8_t iv[16] = "";
     int has_iv = 0;
@@ -595,6 +602,8 @@ static int parse_playlist(HLSContext *c, const char *url,
         } else if (av_strstart(line, "#EXTINF:", &ptr)) {
             is_segment = 1;
             duration   = atof(ptr) * AV_TIME_BASE;
+        } else if (av_strstart(line, "#EXT-X-DISCONTINUITY", &ptr)) {
+            discontinuity_seg_pts = pls_duration / av_q2d(get_timebase(pls));
         } else if (av_strstart(line, "#EXT-X-BYTERANGE:", &ptr)) {
             seg_size = atoi(ptr);
             ptr = strchr(ptr, '@');
@@ -626,6 +635,9 @@ static int parse_playlist(HLSContext *c, const char *url,
                 }
                 seg->duration = duration;
                 seg->key_type = key_type;
+                seg->seg_pts_base = discontinuity_seg_pts;
+                pls_duration += duration / AV_TIME_BASE;
+                
                 if (has_iv) {
                     memcpy(seg->iv, iv, sizeof(iv));
                 } else {
@@ -1610,6 +1622,15 @@ static int hls_read_packet(AVFormatContext *s, AVPacket *pkt)
         struct playlist *pls = c->playlists[minplaylist];
         *pkt = pls->pkt;
         pkt->stream_index += pls->stream_offset;
+        
+        // fix pts if DISCONTINUITY
+        int64_t seq_no = (pls->cur_seq_no - pls->start_seq_no);
+        if (0 <= seq_no && seq_no < pls->n_segments)
+        {
+            struct segment *seg = pls->segments[seq_no];
+            pkt->pts += seg->seg_pts_base;
+        }
+        
         reset_packet(&c->playlists[minplaylist]->pkt);
 
         if (pkt->dts != AV_NOPTS_VALUE)
