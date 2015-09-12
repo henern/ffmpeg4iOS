@@ -32,6 +32,9 @@ rm -f $headerDir/*.h
 
 $xbinDir/make clean
 
+set dependencyDir="../dependency"
+set opensslDir="${dependencyDir}/openssl"
+
 #./configure --arch=i386 --extra-cflags='-arch i386' --extra-ldflags='-arch i386'  --disable-encoders --disable-debug --disable-mmx
 
 ./configure \
@@ -42,8 +45,8 @@ $xbinDir/make clean
 --target-os=darwin \
 --arch="${ARCH}" \
 --cpu="${CPU}" \
---extra-cflags="-arch ${ARCH} ${EXTFLAGS_CC} -mdynamic-no-pic" \
---extra-ldflags="-arch ${ARCH} ${EXTFLAGS_LD} -isysroot ${SYS_ROOT}" \
+--extra-cflags="-arch ${ARCH} ${EXTFLAGS_CC} -mdynamic-no-pic -I${opensslDir}/include" \
+--extra-ldflags="-arch ${ARCH} ${EXTFLAGS_LD} -isysroot ${SYS_ROOT} -L${opensslDir}/libs/${ARCH}" \
 --prefix="compiled/${ARCH}" \
 --enable-cross-compile \
 --enable-nonfree \
