@@ -162,7 +162,7 @@ echo "Build library..."
 #lipo -create ${CURRENTPATH}/bin/iPhoneSimulator${SDKVERSION}-i386.sdk/lib/libcrypto.a ${CURRENTPATH}/bin/iPhoneSimulator${SDKVERSION}-x86_64.sdk/lib/libcrypto.a ${CURRENTPATH}/bin/iPhoneOS${SDKVERSION}-armv7.sdk/lib/libcrypto.a ${CURRENTPATH}/bin/iPhoneOS${SDKVERSION}-armv7s.sdk/lib/libcrypto.a ${CURRENTPATH}/bin/iPhoneOS${SDKVERSION}-arm64.sdk/lib/libcrypto.a -output ${CURRENTPATH}/lib/libcrypto.a
 
 mkdir -p ${CURRENTPATH}/include
-cp -R ${CURRENTPATH}/bin/iPhoneSimulator${SDKVERSION}-arm64.sdk/include/openssl ${CURRENTPATH}/include/
+cp -R ${CURRENTPATH}/bin/iPhoneOS${SDKVERSION}-arm64.sdk/include/openssl ${CURRENTPATH}/include/
 echo "Building done."
 echo "Cleaning up..."
 rm -rf ${CURRENTPATH}/src/openssl-${VERSION}
