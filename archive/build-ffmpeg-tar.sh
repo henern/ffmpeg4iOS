@@ -15,6 +15,14 @@ echo "unzip ${FF_TAR_NAME} to ${BUILD_SRC_DIR} ..."
 tar zxf ${FF_TAR_NAME} -C "${BUILD_SRC_DIR}"
 cd "${BUILD_SRC_DIR}/ffmpeg-${VERSION}"
 
+# patch
+PATCH_DIR="${BUILD_SRC_DIR}/patch/${VERSION}"
+if [ -d "${PATCH_DIR}" ];
+then
+    echo "enable patch-${VERSION} ..."
+    cp -Rf "${PATCH_DIR}/" "${BUILD_SRC_DIR}/ffmpeg-${VERSION}"
+fi
+
 for ARCH in ${ARCHS}
 do
     echo ""
