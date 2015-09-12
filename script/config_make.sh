@@ -47,6 +47,7 @@ $xbinDir/make clean
 --prefix="compiled/${ARCH}" \
 --enable-cross-compile \
 --enable-nonfree \
+--enable-openssl \
 --enable-gpl \
 --disable-armv5te \
 --disable-swscale-alpha \
