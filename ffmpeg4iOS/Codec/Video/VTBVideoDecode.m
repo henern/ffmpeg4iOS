@@ -219,7 +219,7 @@ ERROR:
     CPRA(avc_fmt);
     
     // FIXME: 2 is a magic number here, remove it if i find where the size of reorder-buffer is.
-    m_count4delayedPic = ctxCodec->has_b_frames + 2;
+    m_count4delayedPic = ctxCodec->has_b_frames + 4;
     CBRA(0 <= m_count4delayedPic && m_count4delayedPic < MAX_DELAYED_PIC);
     
     // for more details, check https://developer.apple.com/videos/wwdc/2014/#513

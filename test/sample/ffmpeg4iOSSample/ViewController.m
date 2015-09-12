@@ -21,6 +21,7 @@
 #define __3GP_H263_SAMR__           0
 #define __OGG_THEO_VORB__           0
 #define __FLV_FLV1_MP3__            0
+#define __MP4_H264_AACLOW_HTTPS__   0
 
 @interface ViewController ()
 {
@@ -79,6 +80,10 @@
     
 #if __FLV_FLV1_MP3__
     path = @"http://techslides.com/demos/sample-videos/small.flv";
+#endif
+    
+#if __MP4_H264_AACLOW_HTTPS__
+    path = @"https://raw.githubusercontent.com/henern/ffmpeg4iOS/master/test/resources/Opera.480p.x264.AAC.mp4";
 #endif
     
     screen = [[DEF_CLASS(ffmpegPlayerCore) alloc] initWithFrame:self.view.bounds
