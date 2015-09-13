@@ -21,7 +21,7 @@ Features
 7. misc: customized-user-agent, 
 8. protocol: http, https, 
 9. patch: EXT-X-DISCONTINUITY, 
-X. coming (not that soon) ...
+10. coming (not that soon) ...
 
 Samples
 -------
