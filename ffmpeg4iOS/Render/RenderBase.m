@@ -91,6 +91,14 @@ ERROR:
     return ret;
 }
 
+- (BOOL)appendPacket:(AVPacket *)pkt
+{
+    BOOL ret = [super appendPacket:pkt];
+    [self __packetMayBeAvailable];
+    
+    return ret;
+}
+
 - (void)cleanup
 {
     [self __destroyRenderingThread];
@@ -115,16 +123,19 @@ ERROR:
         return NO;
     }
     
+    [self __packetMayBeAvailable];
     return YES;
 }
 
 - (BOOL)doPlay
 {
+    [self __packetMayBeAvailable];
     return YES;
 }
 
 - (BOOL)doPause
 {
+    [self __packetMayBeAvailable];
     return YES;
 }
 
@@ -140,9 +151,13 @@ ERROR:
     {
         @autoreleasepool
         {
-        NSDate *nearFuture = [NSDate dateWithTimeIntervalSinceNow:0.5f];
         NSRunLoop *runloop = [NSRunLoop currentRunLoop];
-        [runloop runUntilDate:nearFuture];
+        NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:1.f
+                                                          target:self
+                                                        selector:@selector(__impl_packetMayBeAvailable:)
+                                                        userInfo:nil
+                                                         repeats:YES];
+        [runloop runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
         
         // one or more packets are available
         BOOL shouldQuit = NO;
@@ -151,6 +166,7 @@ ERROR:
         
         if (shouldQuit)
         {
+            [timer invalidate];
             break;
         }
         }
@@ -160,6 +176,22 @@ ERROR:
     SIGNAL_CONDITION(m_signal_thread_quit);
     
     FFMLOG(@"%@ quits", [NSThread currentThread].name);
+}
+
+- (void)__packetMayBeAvailable
+{
+    if (m_render_thread)
+    {
+        [self performSelector:@selector(__impl_packetMayBeAvailable:)
+                     onThread:m_render_thread
+                   withObject:nil
+                waitUntilDone:NO];
+    }
+}
+
+- (void)__impl_packetMayBeAvailable:(id)param
+{
+    VRENDERTHREAD();
 }
 
 - (BOOL)__handlePacketsIfQuit:(BOOL*)ifQuit
@@ -293,6 +325,7 @@ RETRY_DELAY:
     if (delay < 0.f)
     {
         // drop
+        FFMLOG_OC(@"DROP A YUVBUF AT %lf", pts);
         FINISH();
     }
     

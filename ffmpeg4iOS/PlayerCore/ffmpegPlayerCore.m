@@ -294,6 +294,8 @@
         @autoreleasepool
         {
         
+        BOOL isEOF = NO;
+            
         if (m_shouldSeek)
         {
             err = av_seek_frame(avfContext, DEFAULT_STREAM, m_pendingSeekTo * AV_TIME_BASE, 0);
@@ -319,7 +321,7 @@
         [syncCore start];
         
         // recv the packet from ffmpeg
-        [self __sync_readPacket4context:avfContext render:render_engine audio:audio_engine];
+        [self __sync_readPacket4context:avfContext render:render_engine audio:audio_engine isEOF:&isEOF];
         
         // aspect-ratio may change
         if ([render_engine aspectRatio] != self.aspectRatio)
@@ -346,6 +348,12 @@
             self.position = pos;
         END_RUN_IN_MAIN();
             
+        // keep CPU idle if EOF
+        if (isEOF)
+        {
+            usleep(0.5 * MS_PER_SEC);
+            continue;
+        }
         }
     }
     
@@ -397,12 +405,15 @@ DONE:
 - (void)__sync_readPacket4context:(AVFormatContext*)avfContext
                            render:(REF_CLASS(RenderBase))render_egine
                             audio:(REF_CLASS(AudioEngine))audio_engine
+                            isEOF:(BOOL*)isEOF
 {
     VBR([NSThread currentThread] == self.m_ffmpegQueue);
     
     BOOL ret = YES;
     AVPacket packet = {0};
     int err = ERR_SUCCESS;
+    
+    *isEOF = NO;
     
     while (1)
     {
@@ -421,6 +432,13 @@ DONE:
         err = av_read_frame(avfContext, &packet);
         if (err != ERR_SUCCESS)
         {
+            if (avfContext->pb->eof_reached &&
+                avfContext->pb->error == 0)
+            {
+                *isEOF = YES;
+                break;
+            }
+            
             if (err == AVERROR(EAGAIN) && avfContext->pb->error == AVERROR(EAGAIN))
             {
                 avfContext->pb->eof_reached = 0;
