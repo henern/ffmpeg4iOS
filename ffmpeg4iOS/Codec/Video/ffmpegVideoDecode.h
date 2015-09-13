@@ -20,5 +20,6 @@
            finished:(int*)finished;
 
 - (int)count4pendingYUVBuffers;
+- (void)reset;
 
 @end

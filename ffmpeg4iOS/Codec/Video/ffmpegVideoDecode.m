@@ -74,4 +74,9 @@ ERROR:
     return 0;
 }
 
+- (void)reset
+{
+    // nothing
+}
+
 @end

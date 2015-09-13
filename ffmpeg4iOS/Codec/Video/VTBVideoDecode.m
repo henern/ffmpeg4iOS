@@ -200,6 +200,11 @@ ERROR:
     return (int)[m_pendingYUV count];
 }
 
+- (void)reset
+{
+    [m_pendingYUV removeAllObjects];
+}
+
 #pragma mark private
 - (BOOL)__avcConfig4codec:(AVCodecContext*)ctxCodec
                   avc_fmt:(CMFormatDescriptionRef*)avc_fmt

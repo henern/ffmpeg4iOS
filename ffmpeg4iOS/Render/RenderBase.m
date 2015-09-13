@@ -107,6 +107,8 @@ ERROR:
 {
     [super reset];
     
+    [m_decoder reset];
+    
     if (![self __setupRendering])
     {
         VERROR();
