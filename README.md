@@ -19,7 +19,9 @@ Features
 5. audio: AudioQueue
 6. hardware accelerator: mp3 + aac + he-aac, h264, 
 7. misc: customized-user-agent, 
-8. coming (not that soon) ...
+8. protocol: http, https, 
+9. patch: EXT-X-DISCONTINUITY, 
+X. coming (not that soon) ...
 
 Samples
 -------
@@ -28,8 +30,7 @@ Samples
 
 TODO
 ----
-1. https
-2. subtitles
+1. subtitles
 
 License
 -------
