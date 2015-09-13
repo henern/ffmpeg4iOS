@@ -285,7 +285,9 @@ ERROR:
     }
     
     // delay since previous frame
-    double delay = pts - m_last_pts;
+    double delay = 0.f;
+RETRY_DELAY:
+    delay = pts - m_last_pts;
     if (delay < 0.f)
     {
         // drop
@@ -294,6 +296,14 @@ ERROR:
     
     // sync with sync-core
     delay = [self delay4pts:pts delayInPlan:delay];
+    
+    // big delay usually means something wrong, e.g. audio may be far out-of-sync right after seeking.
+    // wait 1 sec, then re-calculate the delay.
+    if (delay > 1.0f)
+    {
+        sleep(1);
+        goto RETRY_DELAY;
+    }
     
     // delay for this frame
     ret = [self __delayDrawYUV:yuvBuf delay:delay];
@@ -334,6 +344,9 @@ ERROR:
     {
         WAIT_CONDITION_BEGIN(m_signal_thread_quit);
         
+        // set flag to make sure QUIT-PKT will be consumed
+        AVSE_STATUS_SET(AVSTREAM_ENGINE_STATUS_QUITING);
+        
         [self.pkt_queue reset];
         [self __appendQuitPacket];
         
@@ -345,6 +358,8 @@ ERROR:
     
     m_render_thread = NULL;
     m_last_pts = AV_NOPTS_VALUE;
+    
+    AVSE_STATUS_UNSET(AVSTREAM_ENGINE_STATUS_QUITING);
 }
 
 - (BOOL)__delayDrawYUV:(id<DEF_CLASS(YUVBuffer)>)yuvBuf delay:(double)delayInSec

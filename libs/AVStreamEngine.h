@@ -17,6 +17,7 @@ typedef enum
     AVSTREAM_ENGINE_STATUS_INIT         = 0x0000,
     AVSTREAM_ENGINE_STATUS_PREPARE      = 0x0001,
     AVSTREAM_ENGINE_STATUS_PLAYING      = 0x0002,
+    AVSTREAM_ENGINE_STATUS_QUITING      = 0x0004,
     
     // more?
     
@@ -26,6 +27,7 @@ typedef enum
 
 #define AVSE_STATUS_IS_PREPARE()        (([self status] & AVSTREAM_ENGINE_STATUS_PREPARE) != 0)
 #define AVSE_STATUS_IS_PLAYING()        (([self status] & AVSTREAM_ENGINE_STATUS_PLAYING) != 0)
+#define AVSE_STATUS_IS_QUITING()        (([self status] & AVSTREAM_ENGINE_STATUS_QUITING) != 0)
 
 #define AVSE_STATUS_UNSET(s)            (self.status &= ~(s))
 #define AVSE_STATUS_SET(s)              (self.status |= (s))

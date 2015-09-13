@@ -184,7 +184,8 @@ ERROR:
 - (BOOL)popPacket:(AVPacket*)destPkt
 {
     if (!AVSE_STATUS_IS_PLAYING() &&
-        !AVSE_STATUS_IS_PREPARE())
+        !AVSE_STATUS_IS_PREPARE() &&
+        !AVSE_STATUS_IS_QUITING())
     {
         return NO;
     }
@@ -195,7 +196,8 @@ ERROR:
 - (AVPacket*)topPacket
 {
     if (!AVSE_STATUS_IS_PLAYING() &&
-        !AVSE_STATUS_IS_PREPARE())
+        !AVSE_STATUS_IS_PREPARE() &&
+        !AVSE_STATUS_IS_QUITING())
     {
         return NULL;
     }
@@ -236,7 +238,7 @@ ERROR:
     
     // FIXME: drop the frame if diff a lot
     double diff = pts - [self.ref_synccore timestamp];
-    if (diff < -delay)
+    if (diff < 0.f)
     {
         delay = 0.f;    // is slow
     }
