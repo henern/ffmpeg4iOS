@@ -27,6 +27,8 @@
 		239B6BB81B5B6E9E00A6EB7D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 239B6BB71B5B6E9E00A6EB7D /* UIKit.framework */; };
 		23C904631B67CF7000184431 /* VideoToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 23C904621B67CF7000184431 /* VideoToolbox.framework */; };
 		23CCC18E1B87703A000245B4 /* Opera.480p.x264.AAC.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 23CCC18D1B87703A000245B4 /* Opera.480p.x264.AAC.mp4 */; };
+		23F0A2B41BA514BB00F8ECA5 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23F0A2B21BA514BB00F8ECA5 /* libcrypto.a */; };
+		23F0A2B51BA514BB00F8ECA5 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 23F0A2B31BA514BB00F8ECA5 /* libssl.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +72,8 @@
 		239B6BB71B5B6E9E00A6EB7D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		23C904621B67CF7000184431 /* VideoToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = VideoToolbox.framework; path = System/Library/Frameworks/VideoToolbox.framework; sourceTree = SDKROOT; };
 		23CCC18D1B87703A000245B4 /* Opera.480p.x264.AAC.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = Opera.480p.x264.AAC.mp4; sourceTree = "<group>"; };
+		23F0A2B21BA514BB00F8ECA5 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = ../../ffmpeg/dependency/openssl/libs/universal/libcrypto.a; sourceTree = "<group>"; };
+		23F0A2B31BA514BB00F8ECA5 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = ../../ffmpeg/dependency/openssl/libs/universal/libssl.a; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,7 +87,9 @@
 				232A24AB1B5B72020074F5A5 /* Foundation.framework in Frameworks */,
 				239B6BB81B5B6E9E00A6EB7D /* UIKit.framework in Frameworks */,
 				239B6BA51B5ACCA100A6EB7D /* AudioToolbox.framework in Frameworks */,
+				23F0A2B41BA514BB00F8ECA5 /* libcrypto.a in Frameworks */,
 				239B6BA31B5ACC9500A6EB7D /* AVFoundation.framework in Frameworks */,
+				23F0A2B51BA514BB00F8ECA5 /* libssl.a in Frameworks */,
 				239B6B981B5AC76000A6EB7D /* libiconv.2.4.0.dylib in Frameworks */,
 				239B6B961B5AC75100A6EB7D /* libbz2.1.0.dylib in Frameworks */,
 				239B6B941B5AC74100A6EB7D /* libz.1.2.5.dylib in Frameworks */,
@@ -149,6 +155,8 @@
 		239B6B6F1B5AC46A00A6EB7D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				23F0A2B21BA514BB00F8ECA5 /* libcrypto.a */,
+				23F0A2B31BA514BB00F8ECA5 /* libssl.a */,
 				23386F1A1B839276001DD3D3 /* ffmpeg4iOS.xcodeproj */,
 				23C904621B67CF7000184431 /* VideoToolbox.framework */,
 				232A24AE1B5B793B0074F5A5 /* CoreMedia.framework */,
@@ -388,6 +396,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/../../ffmpeg4iphone-read-only/ffmpeg-libs/i386",
+					"$(PROJECT_DIR)/../../ffmpeg4iOS/ffmpeg/dependency/openssl/libs/universal",
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-ObjC";
@@ -415,6 +424,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/../../ffmpeg4iphone-read-only/ffmpeg-libs/i386",
+					"$(PROJECT_DIR)/../../ffmpeg/dependency/openssl/libs/universal",
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_LDFLAGS = "-ObjC";
