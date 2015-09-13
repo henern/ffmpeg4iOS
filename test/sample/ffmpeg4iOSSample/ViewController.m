@@ -21,7 +21,7 @@
 #define __3GP_H263_SAMR__           0
 #define __OGG_THEO_VORB__           0
 #define __FLV_FLV1_MP3__            0
-#define __MP4_H264_AACLOW_HTTPS__   0
+#define __MP4_H264_AACLOW_HTTPS__   1
 
 @interface ViewController ()
 {
