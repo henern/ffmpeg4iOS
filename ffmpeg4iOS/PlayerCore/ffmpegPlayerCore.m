@@ -432,8 +432,8 @@ DONE:
         err = av_read_frame(avfContext, &packet);
         if (err != ERR_SUCCESS)
         {
-            if (avfContext->pb->eof_reached &&
-                avfContext->pb->error == 0)
+            if (err == AVERROR_EOF ||
+                (avfContext->pb->eof_reached && avfContext->pb->error == 0))
             {
                 *isEOF = YES;
                 break;
