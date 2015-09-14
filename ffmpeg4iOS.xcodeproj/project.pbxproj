@@ -67,6 +67,7 @@
 		4A10298C1B84B59500129BE7 /* VTBTexProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A10298B1B84B59500129BE7 /* VTBTexProvider.m */; };
 		4A10298F1B84B5C700129BE7 /* VTBNV12TexProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A10298E1B84B5C700129BE7 /* VTBNV12TexProvider.m */; };
 		4A1029921B84B5DA00129BE7 /* VTB2VUYTexProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = 4A1029911B84B5DA00129BE7 /* VTB2VUYTexProvider.m */; };
+		4AB8B6631BA6C0CC00EC9DA4 /* FFAVAllocator.m in Sources */ = {isa = PBXBuildFile; fileRef = 4AB8B6621BA6C0CC00EC9DA4 /* FFAVAllocator.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -572,6 +573,8 @@
 		4A1029901B84B5DA00129BE7 /* VTB2VUYTexProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VTB2VUYTexProvider.h; sourceTree = "<group>"; };
 		4A1029911B84B5DA00129BE7 /* VTB2VUYTexProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VTB2VUYTexProvider.m; sourceTree = "<group>"; };
 		4A3C90AE1B8482880008FF0A /* UYVY2RGB.frag */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = UYVY2RGB.frag; sourceTree = "<group>"; };
+		4AB8B6611BA6C0CC00EC9DA4 /* FFAVAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FFAVAllocator.h; sourceTree = "<group>"; };
+		4AB8B6621BA6C0CC00EC9DA4 /* FFAVAllocator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FFAVAllocator.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1314,6 +1317,8 @@
 				23F72A981B636C2500FC7F3A /* ThreadSafeDebug.m */,
 				237B04B61B6E195700226EEF /* Utility.h */,
 				237B04B71B6E195700226EEF /* Utility.m */,
+				4AB8B6611BA6C0CC00EC9DA4 /* FFAVAllocator.h */,
+				4AB8B6621BA6C0CC00EC9DA4 /* FFAVAllocator.m */,
 			);
 			path = libs;
 			sourceTree = "<group>";
@@ -1383,6 +1388,7 @@
 				237B04B51B6D397000226EEF /* ffmpegYUVBuffer.m in Sources */,
 				232F11471B7680D60033F4BC /* ATBAudioDecodeFactory.m in Sources */,
 				237B04AA1B6D2E8800226EEF /* ffmpegVideoDecode.m in Sources */,
+				4AB8B6631BA6C0CC00EC9DA4 /* FFAVAllocator.m in Sources */,
 				23F72A831B6286D400FC7F3A /* AudioToolBoxEngine.m in Sources */,
 				4A1029921B84B5DA00129BE7 /* VTB2VUYTexProvider.m in Sources */,
 				23F72A881B6286D400FC7F3A /* RenderBase+Factory.m in Sources */,

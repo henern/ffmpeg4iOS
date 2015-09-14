@@ -12,6 +12,7 @@
 #import "ehm.h"
 #import "VTBYUVBuffer.h"
 #import "libavformat/avc.h"
+#import "FFAVAllocator.h"
 
 #define MAX_DELAYED_PIC         8
 
@@ -405,6 +406,8 @@ DONE:
     CMBlockBufferRef dataBlock = nil;
     CMSampleBufferRef sample = nil;
     
+    CFAllocatorRef ff_allocator = [DEF_CLASS(FFAVAllocator) createInst];
+    CPRA(ff_allocator);
     CPRA(sampleBuf);
     
     // startcode to len if need
@@ -424,7 +427,7 @@ DONE:
     err = CMBlockBufferCreateWithMemoryBlock(NULL,
                                              data_ptr,
                                              data_size,
-                                             kCFAllocatorNull,
+                                             ff_allocator,
                                              NULL,
                                              0,
                                              data_size,
@@ -456,6 +459,12 @@ DONE:
     sample = NULL;
     
 ERROR:
+    if (ff_allocator)
+    {
+        CFRelease(ff_allocator);
+        ff_allocator = NULL;
+    }
+    
     if (data_ptr && data_ptr != pkt->data)
     {
         av_free(data_ptr);
